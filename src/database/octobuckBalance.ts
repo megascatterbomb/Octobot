@@ -8,7 +8,8 @@ const octobuckBalanceSchema = new Schema({
     user: {type: String, required: true},
     balance: {type: Number, required: true}
 }, {
-    timestamps: {}
+    timestamps: {},
+    collection: "OctobuckBalance"
 });
 
 const octobuckBalance = mongoose.model("OctobuckBalance", octobuckBalanceSchema, "OctobuckBalance");
@@ -32,6 +33,6 @@ export async function registerBalance(user: string, initialBalance?: bigint) {
 }
 
 export async function getUserBalance(user: string) {
-    const balanceEntry = await octobuckBalance.findOne({user: user});
+    const {balance: balanceEntry} = await octobuckBalance.findOne({user: user});
     return balanceEntry;
 }

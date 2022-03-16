@@ -25,6 +25,8 @@ export default class PingCommand extends Command {
         const user: User = this.user === undefined ? message.author : this.user;
         const balance: number = await getUserBalance(user.id);
 
-        message.channel.send("Balance of " + user + ": " + balance);
+        const displayName: string = await message.member?.nickname ?? message.author.username;
+
+        message.channel.send("Balance of " + displayName + ": " + balance);
     }
 }
