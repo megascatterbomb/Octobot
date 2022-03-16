@@ -23,10 +23,24 @@ export default class PingCommand extends Command {
     
     async execute(message: Message, client: Client) {
         const user: User = this.user === undefined ? message.author : this.user;
-        const balance: number = await getUserBalance(user.id);
+
+        if(user.bot) {
+            message.channel.send("Could not find the balance of that user (bots cannot have a balance)");
+            return;
+        } 
 
         const displayName: string = await message.member?.nickname ?? message.author.username;
-
+        let balance = null;
+        try {
+            balance = await getUserBalance(user.id);
+        } catch {
+            if(await message.guild?.members.fetch(user)) {
+                message.channel.send("Could not find the balance of that user (they do not have a balance)");
+            } else {
+                message.channel.send("Could not find the balance of that user (they are not in the server)");
+            }
+            return;
+        }
         message.channel.send("Balance of " + displayName + ": " + balance);
     }
 }

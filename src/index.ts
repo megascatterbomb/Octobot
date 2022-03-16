@@ -12,5 +12,5 @@ require('dotenv').config();
     await connectToDatabase();
 
     const key: string = process.env.DISCORD_TOKEN ?? "invalid key";
-    client.login(key);
+    client.login(key).then(() => console.log("Connected to Discord"));
 })();
