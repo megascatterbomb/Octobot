@@ -13,6 +13,7 @@ import {
     UserType,
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
+import { getUserBalance } from "../database/octobuckBalance";
 
 @Alias("balance", "bal", "money")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -21,6 +22,9 @@ export default class PingCommand extends Command {
     user!: User;
     
     async execute(message: Message, client: Client) {
-        message.channel.send(this.user === undefined ? message.author.id : this.user.id);
+        const user: User = this.user === undefined ? message.author : this.user;
+        const balance: number = await getUserBalance(user.id);
+
+        message.channel.send("Balance of " + user + ": " + balance);
     }
 }

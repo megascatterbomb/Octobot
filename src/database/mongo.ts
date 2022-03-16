@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 
-const user: string = "mega";
-const pw: string = process.env.MONGO_PASSWORD ?? "invalid";
 
-const DEFAULT_CONNECTION_STRING: string = "mongodb+srv://" + user +":" + pw + "@<your-cluster-url>/sample_airbnb?retryWrites=true&w=majority";
 
-export default function connectToDatabase(connectionString = DEFAULT_CONNECTION_STRING) {
-    return mongoose.connect(connectionString);
+export default async function connectToDatabase(connectionString ?: string) {
+    const user: string = "mega";
+    const pw: string = process.env.MONGO_PASSWORD ?? "invalid";
+
+    connectionString = connectionString ?? "mongodb+srv://" + user +":" + pw + "@octodb.imnew.mongodb.net/OctoDB?retryWrites=true&w=majority";
+    return await mongoose.connect(connectionString);
 }

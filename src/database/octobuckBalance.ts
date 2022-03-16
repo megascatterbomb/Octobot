@@ -1,16 +1,17 @@
 import { IntegerType } from "@frasermcc/overcord";
 import mongoose from "mongoose";
-import { number } from "zod";
 const Schema = mongoose.Schema;
 
 // Octobuck Balance Schema
 
 const octobuckBalanceSchema = new Schema({
     user: {type: String, required: true},
-    balance: {type: number, required: true}
+    balance: {type: Number, required: true}
+}, {
+    timestamps: {}
 });
 
-const octobuckBalance = mongoose.model('OctobuckBalance', octobuckBalanceSchema);
+const octobuckBalance = mongoose.model("OctobuckBalance", octobuckBalanceSchema, "OctobuckBalance");
 
 export {octobuckBalance};
 
