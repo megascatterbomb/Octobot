@@ -9,16 +9,18 @@ import {
     UnionType,
     FloatType,
     Client,
+    StringType,
+    UserType,
 } from "@frasermcc/overcord";
-import { Message } from "discord.js";
+import { Message, User } from "discord.js";
 
-@Alias("ping", "hello", "test")
+@Alias("balance", "bal", "money")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
-@Permit("ADMINISTRATOR")
 export default class PingCommand extends Command {
-
+    @Argument({ type: new UserType() , optional: true})
+    user!: User;
+    
     async execute(message: Message, client: Client) {
-        console.log("Ping received from " + message.author.username + " " + message.author.id); 
-        message.channel.send("Pong!");
+        message.channel.send(this.user === undefined ? message.author.id : this.user.id);
     }
 }
