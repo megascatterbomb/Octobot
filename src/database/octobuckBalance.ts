@@ -51,6 +51,10 @@ export async function getUserBalance(user: User): Promise<number | null> {
 // Returns true if successful
 export async function addBalance(user: User, amount: number): Promise<boolean> {
     
+    if(amount < 0) {
+        return false;
+    }
+
     let oldBalance: number;
     oldBalance = await getUserBalance(user) ?? -1;
     if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
@@ -58,6 +62,29 @@ export async function addBalance(user: User, amount: number): Promise<boolean> {
     }
     oldBalance = Math.max(oldBalance, 0);
     const newBalance = oldBalance + amount;
+
+    const balance = {
+        user: user.id,
+        balance: newBalance
+    }
+
+    await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
+
+    return true;
+}
+
+export async function setBalance(user: User, amount: number): Promise<boolean> {
+
+    if(amount < 0) {
+        return false;
+    }
+
+    let oldBalance: number;
+    oldBalance = await getUserBalance(user) ?? -1;
+    if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
+        return false;
+    }
+    const newBalance = amount;
 
     const balance = {
         user: user.id,
