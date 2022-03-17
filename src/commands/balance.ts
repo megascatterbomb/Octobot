@@ -43,6 +43,6 @@ export default class PingCommand extends Command {
             return;
         }
 
-        message.channel.send("Balance of " + displayName + ": " + balance);
+        message.channel.send("Balance of " + displayName + ": $" + balance);
     }
 }
