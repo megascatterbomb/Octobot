@@ -10,6 +10,7 @@ import {
     FloatType,
     Client,
     UserType,
+    Described,
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
 import { addBalance, registerBalance, setBalance } from "../database/octobuckBalance";
@@ -17,6 +18,7 @@ import { addBalance, registerBalance, setBalance } from "../database/octobuckBal
 @Alias("setbalance", "set")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Permit("ADMINISTRATOR")
+@Described("Set the balance of a user")
 export default class PingCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to set the balance of"})
     user!: User;
@@ -26,9 +28,9 @@ export default class PingCommand extends Command {
 
     async execute(message: Message, client: Client) {
         const displayName: string = await (await message.guild?.members.fetch(this.user.id))?.displayName ?? this.user.username;
-        const success: boolean = await setBalance(this.user, this.amount);
-        message.channel.send(success ?
-            "Sucessfully set balance of $" + displayName + " to $" + this.amount :
-            "Failed to set balance");
+        const err: string = await setBalance(this.user, this.amount);
+        message.channel.send(err ?
+            "Failed to set balance: " + err :
+            "Sucessfully set balance of $" + displayName + " to $" + this.amount);
     }
 }

@@ -49,16 +49,16 @@ export async function getUserBalance(user: User): Promise<number | null> {
 }
 
 // Returns true if successful
-export async function addBalance(user: User, amount: number): Promise<boolean> {
+export async function addBalance(user: User, amount: number): Promise<string> {
     
     if(amount < 0) {
-        return false;
+        return "Cannot grant a negative amount of Octobucks";
     }
 
     let oldBalance: number;
     oldBalance = await getUserBalance(user) ?? -1;
     if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
-        return false;
+        return "Cannot find this user in the server";
     }
     oldBalance = Math.max(oldBalance, 0);
     const newBalance = oldBalance + amount;
@@ -70,19 +70,19 @@ export async function addBalance(user: User, amount: number): Promise<boolean> {
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
 
-    return true;
+    return "";
 }
 
-export async function setBalance(user: User, amount: number): Promise<boolean> {
+export async function setBalance(user: User, amount: number): Promise<string> {
 
     if(amount < 0) {
-        return false;
+        return "Cannot set a balance below 0";
     }
 
     let oldBalance: number;
     oldBalance = await getUserBalance(user) ?? -1;
     if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
-        return false;
+        return "Cannot find this user in the server";
     }
     const newBalance = amount;
 
@@ -93,5 +93,5 @@ export async function setBalance(user: User, amount: number): Promise<boolean> {
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
 
-    return true;
+    return "";
 }
