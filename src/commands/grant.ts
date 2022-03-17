@@ -25,7 +25,7 @@ export default class PingCommand extends Command {
     amount!: number;
 
     async execute(message: Message, client: Client) {
-        const displayName: string = await message.member?.nickname ?? message.author.username;
+        const displayName: string = await (await message.guild?.members.fetch(this.user.id))?.displayName ?? this.user.username;
         const success: boolean = await addBalance(this.user, this.amount);
         message.channel.send(success ?
             "Sucessfully bestowed $" + this.amount + " to " + displayName :
