@@ -14,7 +14,7 @@ import {
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
 import { addBalance, registerBalance } from "../database/octobuckBalance";
-import getDiscordName from "../utilities/displayName";
+import { getDiscordName } from "../utilities/helpers";
 
 @Alias("grant", "bestow")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
