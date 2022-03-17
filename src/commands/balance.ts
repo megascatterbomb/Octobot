@@ -15,6 +15,7 @@ import {
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
 import { getUserBalance } from "../database/octobuckBalance";
+import { getDiscordName } from "../utilities/helpers";
 
 @Alias("balance", "bal", "money")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -31,7 +32,7 @@ export default class PingCommand extends Command {
             return;
         } 
 
-        const displayName: string = await (await message.guild?.members.fetch(user.id))?.displayName ?? user.username;
+        const displayName: string = await getDiscordName(this.user, message, client);
 
         let balance = await getUserBalance(user);
 

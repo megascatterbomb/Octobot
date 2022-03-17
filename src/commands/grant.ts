@@ -14,6 +14,7 @@ import {
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
 import { addBalance, registerBalance } from "../database/octobuckBalance";
+import getDiscordName from "../utilities/displayName";
 
 @Alias("grant", "bestow")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -27,7 +28,7 @@ export default class PingCommand extends Command {
     amount!: number;
 
     async execute(message: Message, client: Client) {
-        const displayName: string = await (await message.guild?.members.fetch(this.user.id))?.displayName ?? this.user.username;
+        const displayName: string = await getDiscordName(this.user, message, client);
         const err: string = await addBalance(this.user, this.amount);
         message.channel.send(err ?
             "Failed to bestow octobucks: " + err :
