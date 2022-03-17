@@ -31,10 +31,10 @@ export default class PingCommand extends Command {
             return;
         } 
 
-        const displayName: string = await message.member?.nickname ?? message.author.username;
+        const displayName: string = await (await message.guild?.members.fetch(user.id))?.displayName ?? message.author.username;
 
         let balance = await getUserBalance(user);
-        
+
         if(balance === null && await message.guild?.members.fetch(user)) {
             message.channel.send("Could not find the balance of that user (they do not have a balance)");
             return;
