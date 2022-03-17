@@ -57,6 +57,8 @@ export async function addBalance(user: User, amount: number): Promise<string> {
 
     let oldBalance: number;
     oldBalance = await getUserBalance(user) ?? -1;
+
+    // Try to register user, if return undefined that means that user isnt in the server.
     if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
         return "Cannot find this user in the server";
     }
