@@ -31,7 +31,7 @@ export default class PingCommand extends Command {
             return;
         } 
 
-        const displayName: string = await (await message.guild?.members.fetch(user.id))?.displayName ?? message.author.username;
+        const displayName: string = await (await message.guild?.members.fetch(user.id))?.displayName ?? user.username;
 
         let balance = await getUserBalance(user);
 
