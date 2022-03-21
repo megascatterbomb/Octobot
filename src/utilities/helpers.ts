@@ -12,6 +12,14 @@ export async function getSpecialRoles(user: User, guild: Guild | null): Promise<
     return (await getAllRoles(user, guild)).filter((r) => r.id in Roles);
 }
 
+export async function convertToRolesEnum(rolesIn: Collection<string, Role>): Promise<Roles[]> {
+    const rolesOut: Roles[] = [];
+    for(let r in rolesIn.values()) {;
+        rolesOut.push(r as Roles);
+    }
+    return rolesOut;
+}
+
 export async function getDiscordName(user: User, message: Message, client: Client): Promise<string> {
     return await (await message.guild?.members.fetch(user.id))?.displayName ?? user.username;
 }

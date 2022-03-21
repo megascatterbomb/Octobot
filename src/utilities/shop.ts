@@ -28,7 +28,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return false;
         }
         return true;
-    }}],
+    },
+    description: "Gives you permission to change your nickname for 5 minutes. Once that time's up you're stuck with whatever you chose!"
+    }],
 ]);
 
 
