@@ -15,7 +15,9 @@ export type ShopItem = {
     roleDiscounts: {role: Roles, dPrice: number}[],
     // Purchases should always have a message associated with them; user and guild can be derived from this.
     // Additional arguments are the responsibility of shop item implementers to manage.
-    effect: (message: Message, ...args: any[]) => Promise<any>;
+    // returns: true if successfully used. false otherwise
+    effect: (message: Message, ...args: any[]) => Promise<boolean>,
+    scheduledEvent: null | ((userID: string, guildID: string) => Promise<boolean>)
 }
 
 //let test: ShopItem = {name: "test", basePrice: 100, roleDiscounts: [], effect: async (initiator: User, user2: User) => console.log("Test")}; 
