@@ -2,7 +2,7 @@
 
 import { Collection, Message, User, Permissions, GuildMember } from "discord.js";
 import { client } from "..";
-import { scheduledEvent } from "../database/schedule";
+import { createScheduledEvent } from "../database/schedule";
 import { getAllRoles, getSpecialRoles } from "./helpers";
 import { Roles, ShopItem } from "./types";
 
@@ -16,7 +16,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         }
         await message.member?.permissions.add(Permissions.FLAGS.CHANGE_NICKNAME);
         await message.channel.send("You have five minutes to change your nickname to whatever you want! Right click your avatar -> Edit server profile")
-        return true;
+        const endDate = new Date(Date.now() + 5*60000); // five minutes from execution
+        const result: boolean = await createScheduledEvent("nickname", message.author.id, message.guild?.id, endDate);
+        return result;
     }, scheduledEvent: async (userID: string, guildID: string): Promise<boolean> => {
         try {
             let guild = client.guilds.cache.get(guildID);
