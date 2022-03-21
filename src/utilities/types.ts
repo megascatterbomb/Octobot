@@ -15,7 +15,7 @@ export type ShopItem = {
     roleDiscounts: {role: Roles, dPrice: number}[],
     // Purchases should always have a message associated with them; user and guild can be derived from this.
     // Additional arguments are the responsibility of shop item implementers to manage.
-    // returns: true if successfully used. false otherwise
+    // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
     effect: (message: Message, ...args: any[]) => Promise<boolean>,
     scheduledEvent: null | ((userID: string, guildID: string) => Promise<boolean>)
 }
