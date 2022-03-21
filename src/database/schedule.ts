@@ -1,4 +1,3 @@
-import { exception } from "console";
 import { Guild } from "discord.js";
 import { model, Schema, Model, Types} from "mongoose";
 import { shopItems } from "../utilities/shop";
@@ -14,7 +13,7 @@ interface ScheduledEvent {
 }
 
 const scheduledEventSchema = new Schema<ScheduledEvent>({
-    _id: {type: String, required: true, unique: true},
+    _id: {type: String, _id: true},
     user: {type: String, required: true},
     guild: {type: String, required: true},
     shopItem: {type: String, required: true},

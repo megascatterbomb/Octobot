@@ -1,10 +1,9 @@
 import { Guild, User, Role, Collection, Message, Client} from "discord.js";
-import { exception } from "node:console";
 import { Roles } from "./types";
 
 export async function getAllRoles(user: User, guild: Guild | null): Promise<Collection<string, Role>> {
     if(guild === null) {
-        throw exception("Null Guild passed to getAllRoles");
+        throw new Error("Null Guild passed to getAllRoles");
     }
     return await guild.members.cache.get(user.id)?.roles.cache ?? new Collection<string, Role>();
 }
