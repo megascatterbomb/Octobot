@@ -1,7 +1,7 @@
 import { Message, User } from "discord.js";
 
 export enum Roles {
-    gamerGod = "789100430964949022",
+    gamerGod = "658160914331336724",
     gamerPolice = "789099931889041409",
     memeMachine = "835077108699103253",
     famousArtist = "818715240707522580",
