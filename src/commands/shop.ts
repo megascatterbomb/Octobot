@@ -19,7 +19,6 @@ import { Roles } from "../utilities/types";
 
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
-@Permit("ADMINISTRATOR") //TODO: Remove on launch
 @Described("View items available for purchase")
 export default class PingCommand extends Command {
 
