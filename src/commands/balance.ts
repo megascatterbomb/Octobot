@@ -25,14 +25,13 @@ export default class PingCommand extends Command {
     user!: User;
     
     async execute(message: Message, client: Client) {
-        const user: User = this.user === undefined ? message.author : this.user;
-
+        const user: User = this.user ?? message.author;
         if(user.bot) {
             message.channel.send("Could not find the balance of that user (bots cannot have a balance)");
             return;
-        } 
-
-        const displayName: string = await getDiscordName(this.user, message, client);
+        }
+        console.log("test");
+        const displayName: string = await getDiscordName(user, message, client);
 
         let balance = await getUserBalance(user);
 
