@@ -46,7 +46,8 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
 
         // Get the minimum price the user is eligible for.
         const { specialRole, discountPrice } = await getPricingInfoForUser(user, guild, item);
-        const hasDiscount: boolean = specialRole === "";
+        console.log(specialRole + " " + discountPrice);
+        const hasDiscount: boolean = specialRole !== "";
         
         const field = {
             name: "\#" + itemID + ": " + item.name + " - " + (hasDiscount ? "~~$" + item.basePrice + "~~" : "$" + item.basePrice),
