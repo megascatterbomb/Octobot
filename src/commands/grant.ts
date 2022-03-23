@@ -20,7 +20,7 @@ import { getDiscordName } from "../utilities/helpers";
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Grant Octobucks to a user")
 @Permit("ADMINISTRATOR")
-export default class PingCommand extends Command {
+export default class GrantCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to bestow Octobucks upon"})
     user!: User;
 

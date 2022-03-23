@@ -14,9 +14,7 @@ export async function getSpecialRoles(user: User, guild: Guild | null): Promise<
 
 // TODO: Fix always returning empty array
 export async function convertToRolesEnum(rolesIn: Collection<string, Role>): Promise<Roles[]> {
-    console.log(rolesIn);
     const rolesOut: Roles[] = Object.values(Roles).filter((r) => [...rolesIn.keys()].includes(r));
-    console.log(rolesOut);
     return rolesOut;
 }
 

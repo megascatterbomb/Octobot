@@ -6,8 +6,13 @@ const Schema = mongoose.Schema;
 
 // Octobuck Balance Schema
 
+interface Balance {
+    user: string,
+    balance: number
+}
+
 const octobuckBalanceSchema = new Schema({
-    user: {type: String, required: true},
+    user: {type: String, required: true, _id: true},
     balance: {type: Number, required: true}
 }, {
     timestamps: {},
@@ -65,6 +70,31 @@ export async function addBalance(user: User, amount: number): Promise<string> {
     oldBalance = Math.max(oldBalance, 0);
     const newBalance = oldBalance + amount;
 
+    const balance: Balance = {
+        user: user.id,
+        balance: newBalance
+    };
+
+    (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
+
+    return "";
+}
+
+export async function subtractBalance(user: User, amount: number): Promise<boolean> {
+    if(amount < 0) {
+        return false;
+    }
+
+    let oldBalance: number;
+    oldBalance = await getUserBalance(user) ?? -1;
+
+    oldBalance = Math.max(oldBalance, 0);
+    const newBalance = oldBalance - amount;
+
+    if(oldBalance === -1 || newBalance < 0) {
+        return false;
+    }
+
     const balance = {
         user: user.id,
         balance: newBalance
@@ -72,7 +102,7 @@ export async function addBalance(user: User, amount: number): Promise<string> {
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
 
-    return "";
+    return true;
 }
 
 export async function setBalance(user: User, amount: number): Promise<string> {
@@ -88,12 +118,12 @@ export async function setBalance(user: User, amount: number): Promise<string> {
     }
     const newBalance = amount;
 
-    const balance = {
+    const balance: Balance = {
         user: user.id,
         balance: newBalance
-    }
+    };
 
-    await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
+    (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
 
     return "";
 }

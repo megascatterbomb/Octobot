@@ -1,6 +1,7 @@
-import { Guild } from "discord.js";
+import { Guild, User } from "discord.js";
 import { model, Schema, Model, Types} from "mongoose";
 import { shopItems } from "../utilities/shop";
+import { ShopItem } from "../utilities/types";
 
 // Scheduled Event Schema
 interface ScheduledEvent {
@@ -36,15 +37,17 @@ export async function scheduleLoop() {
         const scheduledItems: Array<ScheduledEvent> = await scheduledEvent.find({});
         await scheduledItems.forEach(async (event) => {
             if(event.triggerTime.getTime() < Date.now()) {
-                if(await processScheduledEvent(event)) {
-                    await scheduledEvent.findByIdAndDelete(event._id);
+                const err: string = await processScheduledEvent(event);
+                if(err === "") {
+                    console.log("Running scheduled event \"" + event.shopItem + "\" for user " + event.user);
+                    (await scheduledEvent.findByIdAndDelete(event._id));
                 } else {
                     event.error = true;
-                    await scheduledEvent.findByIdAndUpdate(event);
+                    console.log(err);
+                    (await scheduledEvent.findByIdAndUpdate(event))?.save();
                 }
             }
         });
-        console.log("Finished checking for scheduled events");
         await delay(60);
     }
 }
@@ -71,11 +74,22 @@ export async function createScheduledEvent(shopItem: string, userID: string, gui
     // TODO: new mongoose.Types.ObjectId().toHexString() Use this in creation 
 }
 
-async function processScheduledEvent(event: ScheduledEvent): Promise<boolean> {
+async function processScheduledEvent(event: ScheduledEvent): Promise<string> {
     if(shopItems === null || shopItems.get(event.shopItem) === null) {
-        return false;
+        return "A scheduled event tried to refer to a non-existant shop item.";
     }
-    return await shopItems?.get(event.shopItem)?.scheduledEvent?.(event.user, event.guild) ?? false;
+    const err = await shopItems?.get(event.shopItem)?.scheduledEvent?.(event.user, event.guild) ?? "An unknown error occured trying to run a scheduled event";
+    return err;
+}
+
+export async function getScheduledEvent(user: User, guild: Guild | null, itemName: string): Promise<ScheduledEvent | null> {
+    const event = {
+        user: user.id,
+        guild: guild?.id ?? "",
+        shopItem: itemName
+    }
+    const dbEvent: ScheduledEvent | null = await scheduledEvent.findOne(event);
+    return dbEvent;
 }
 
 function delay(sec: number) {

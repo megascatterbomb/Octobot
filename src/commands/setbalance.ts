@@ -20,7 +20,7 @@ import { getDiscordName } from "../utilities/helpers";
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Permit("ADMINISTRATOR")
 @Described("Set the balance of a user")
-export default class PingCommand extends Command {
+export default class SetBalanceCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to set the balance of"})
     user!: User;
 

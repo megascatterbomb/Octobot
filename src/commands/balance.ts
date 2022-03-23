@@ -20,7 +20,7 @@ import { getDiscordName } from "../utilities/helpers";
 @Alias("balance", "bal", "money")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Get the balance of a user")
-export default class PingCommand extends Command {
+export default class BalanceCommand extends Command {
     @Argument({ type: new UserType() , optional: true, description: "The user whos balance to return. Leave blank to check your own"})
     user!: User;
     
@@ -30,7 +30,6 @@ export default class PingCommand extends Command {
             message.channel.send("Could not find the balance of that user (bots cannot have a balance)");
             return;
         }
-        console.log("test");
         const displayName: string = await getDiscordName(user, message, client);
 
         let balance = await getUserBalance(user);

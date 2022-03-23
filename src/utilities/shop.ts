@@ -2,33 +2,38 @@
 
 import { Collection, Message, User, Permissions, GuildMember, Guild } from "discord.js";
 import { client } from "..";
-import { createScheduledEvent } from "../database/schedule";
+import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { Roles, ShopItem } from "./types";
+import { nickNameRole, Roles, ShopItem } from "./types";
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: Roles.gamerGod, dPrice: 0}, {role: Roles.gamerPolice, dPrice: 0}, 
         {role: Roles.memeMachine, dPrice: 0}, {role: Roles.famousArtist, dPrice: 0}, {role: Roles.ggsVeteran, dPrice: 0}, {role: Roles.gigaGamer, dPrice: 0}], 
-    effect: async (message: Message): Promise<boolean> => {
-        // Not needed (handled by commands/shop.ts) but kept for safety
-        if((await getSpecialRoles(message.author, message.guild)).entries.length !== 0 || message.member?.permissions.has(Permissions.FLAGS.CHANGE_NICKNAME)) {
-            await message.channel.send("One or more of your roles lets you change your nickname for free! Right click your avatar -> Edit server profile");
-            return false;
+    effect: async (message: Message): Promise<string> => {
+        // Deprecated (handled by commands/shop.ts)
+        // if((await getSpecialRoles(message.author, message.guild)).entries.length !== 0 || message.member?.permissions.has(Permissions.FLAGS.CHANGE_NICKNAME)) {
+        //     await message.channel.send("One or more of your roles lets you change your nickname for free! Right click your avatar -> Edit server profile");
+        //     return false;
+        // }
+        if(message.member?.roles.cache.get(nickNameRole) !== undefined || await getScheduledEvent(message.author, message?.guild, "nickname") !== null) {
+            return "You already purchased the ability to change your nickname. Use it!";
         }
-        await message.member?.permissions.add(Permissions.FLAGS.CHANGE_NICKNAME);
+        await message.member?.roles.add(nickNameRole);
         await message.channel.send("You have five minutes to change your nickname to whatever you want! Right click your avatar -> Edit server profile")
         const endDate = new Date(Date.now() + 5*60000); // five minutes from execution
-        const result: boolean = await createScheduledEvent("nickname", message.author.id, message.guild?.id, endDate);
+        const result: string = await createScheduledEvent("nickname", message.author.id, message.guild?.id, endDate) ? "" : "An error occured scheduling the five minute window";
         return result;
-    }, scheduledEvent: async (userID: string, guildID: string): Promise<boolean> => {
+    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         try {
-            let guild = client.guilds.cache.get(guildID);
-            let member = guild?.members.cache.get(userID);
-            await member?.permissions.remove(Permissions.FLAGS.CHANGE_NICKNAME);
-        } catch {
-            return false;
+            var guild = client.guilds.cache.get(guildID);
+            var member = guild?.members.cache.get(userID);
+        } catch (e){return "Failed to get information about this event"}
+
+        // If the role was removed manually then we don't need to do anything nor do we need to throw an error
+        if(member?.roles.cache.get(nickNameRole) !== undefined) {
+            await member?.roles.remove(nickNameRole);
         }
-        return true;
+        return "";
     },
     description: "Gives you permission to change your nickname for 5 minutes. Once that time's up you're stuck with whatever you chose!"
     }],

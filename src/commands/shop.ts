@@ -20,7 +20,7 @@ import { Roles } from "../utilities/types";
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("View items available for purchase")
-export default class PingCommand extends Command {
+export default class ShopCommand extends Command {
 
     async execute(message: Message, client: Client) {
         const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild)
@@ -33,7 +33,7 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
         .setTitle("Octo GAMING Store")
-        .setDescription("Purchase an item using `$buy <item#>` eg: `$buy 1`")
+        .setDescription("Purchase an item using `$buy #` eg: `$buy 1`")
         .setFooter({text: "Purchases are non-refundable. Spend wisely!"})
     
     const fields: EmbedFieldData[] = [];
