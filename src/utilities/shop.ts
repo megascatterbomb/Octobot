@@ -137,7 +137,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["offTopicPerms", {name: "<#818595825143382076> Image Perms", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+    ["offTopicPerms", {name: "#off-topic Image Perms", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
     effect: async (message: Message): Promise<string> => {
         if(message.member?.roles.cache.get(offTopicImageRole) !== undefined) {
