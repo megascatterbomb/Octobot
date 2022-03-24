@@ -42,7 +42,7 @@ export default class BuyCommand extends Command {
         if(requiresTarget && target === null) {
             throw new Error("You need to provide a target for this item. Syntax: $buy " + this.itemNum + " @Target");
         } else if(!requiresTarget && target !== null) {
-            throw new Error("This item does not require a target. Syntax: $buy " + this.itemNum);
+            throw new Error("This item cannot accept a target. Syntax: $buy " + this.itemNum);
         }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
