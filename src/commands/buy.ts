@@ -17,7 +17,7 @@ import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedO
 import { getUserBalance, subtractBalance } from "../database/octobuckBalance";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
-import { Roles, ShopItem } from "../utilities/types";
+import { ShopItem } from "../utilities/types";
 import ShopCommand from "./shop";
 
 @Alias("buy")

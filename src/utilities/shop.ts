@@ -4,11 +4,11 @@ import { Collection, Message, User, Permissions, GuildMember, Guild } from "disc
 import { client } from "..";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { cringeMuteRole, funnyMuteRole, nickNameRole, Roles, ShopItem } from "./types";
+import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, ShopItem } from "./types";
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
-    ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: Roles.gamerGod, dPrice: 0}, {role: Roles.gamerPolice, dPrice: 0}, 
-        {role: Roles.memeMachine, dPrice: 0}, {role: Roles.famousArtist, dPrice: 0}, {role: Roles.ggsVeteran, dPrice: 0}, {role: Roles.gigaGamer, dPrice: 0}], 
+    ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+        {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}], 
     effect: async (message: Message): Promise<string> => {
         // Deprecated (handled by commands/shop.ts)
         // if((await getSpecialRoles(message.author, message.guild)).entries.length !== 0 || message.member?.permissions.has(Permissions.FLAGS.CHANGE_NICKNAME)) {
@@ -49,7 +49,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You cannot target yourself!";
         } else if(targetMember.user.bot) {
             return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(Roles.gamerGod, Roles.gamerPolice)) {
+        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
             return "You cannot target Gamer Gods or Gamer Police.";
         } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
             return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
@@ -75,7 +75,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "";
     },
     requiresTarget: true, 
-    description: `Mute some sorry sucker for 15 minutes. <@&` + Roles.gamerGod + `> and <@&` + Roles.gamerPolice + `> have immunity. Players muted with this will have the <@&`
+    description: `Mute some sorry sucker for 15 minutes. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
         + funnyMuteRole + `> role.` 
     }],
 
@@ -89,7 +89,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You cannot target yourself!";
         } else if(targetMember.user.bot) {
             return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(Roles.gamerGod, Roles.gamerPolice)) {
+        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
             return "You cannot target Gamer Gods or Gamer Police.";
         } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
             return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
@@ -115,7 +115,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "";
     },
     requiresTarget: true, 
-    description: `Mute an even sorrier sucker for 30 minutes. <@&` + Roles.gamerGod + `> and <@&` + Roles.gamerPolice + `> have immunity. Players muted with this will have the <@&`
+    description: `Mute an even sorrier sucker for 30 minutes. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
         + funnyMuteRole + `> role.` 
     }],
 
@@ -129,7 +129,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You cannot target yourself!";
         } else if(targetMember.user.bot) {
             return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(Roles.gamerGod, Roles.gamerPolice)) {
+        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
             return "You cannot target Gamer Gods or Gamer Police.";
         } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
             return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
@@ -155,7 +155,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "";
     },
     requiresTarget: true, 
-    description: `Mute the sorriest sucker you know for a whole hour. <@&` + Roles.gamerGod + `> and <@&` + Roles.gamerPolice + `> have immunity. Players muted with this will have the <@&`
+    description: `Mute the sorriest sucker you know for a whole hour. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
         + funnyMuteRole + `> role.` 
     }],
 ]);
@@ -172,8 +172,8 @@ export async function getPricingInfoForUser(user: User, guild: Guild | null, ite
     let discountPrice: number = item.basePrice;
     let specialRole: string = "";
 
-    let userSpecialRoles: Roles[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
-    const eligibleDiscountRoles: {role: Roles, dPrice: number}[] = item.roleDiscounts.filter((r) => {
+    let userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
+    const eligibleDiscountRoles: {role: SpecialRole, dPrice: number}[] = item.roleDiscounts.filter((r) => {
         return userSpecialRoles.includes(r.role);
     });
     const hasDiscount: boolean = eligibleDiscountRoles.length > 0;

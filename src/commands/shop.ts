@@ -15,7 +15,7 @@ import {
 import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedOptions, Role, User } from "discord.js";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
-import { Roles } from "../utilities/types";
+import { SpecialRole } from "../utilities/types";
 
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -38,7 +38,7 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
     
     const fields: EmbedFieldData[] = [];
 
-    let userSpecialRoles: Roles[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
+    let userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
 
     let itemID: number = 1;
 
