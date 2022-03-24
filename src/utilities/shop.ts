@@ -4,7 +4,7 @@ import { Collection, Message, User, Permissions, GuildMember, Guild } from "disc
 import { client } from "..";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, ShopItem } from "./types";
+import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, ShopItem, basementDwellerRole, offTopicImageRole } from "./types";
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
@@ -80,6 +80,23 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
+    ["basementKeys", {name: "Keys to Octo's Basement", basePrice: 35, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+        {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
+    effect: async (message: Message): Promise<string> => {
+        if(message.member?.roles.cache.get(basementDwellerRole) !== undefined) {
+            return "You already have the keys to the basement. Check your pockets again.";
+        }
+        await message.member?.roles.add(basementDwellerRole);
+        await message.channel.send("You have been given the keys to the basement. Don't lose them!");
+        return "";
+    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+        return "This shopItem doesn't implement any scheduled events.";
+    },
+    requiresTarget: false, 
+    description: "These keys will give you access to the dusty, cramped corners of Octo's basement. Become a <@&" + basementDwellerRole + "> like us!" 
+    }],
+
+
     ["muteMedium", {name: "Mute Member (medium)", basePrice: 45, roleDiscounts: [],
     effect: async (message: Message, target: User): Promise<string> => {
         const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
@@ -118,6 +135,24 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     description: `Mute an even sorrier sucker for 30 minutes. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
         + funnyMuteRole + `> role.` 
     }],
+
+
+    ["offTopicPerms", {name: "<#818595825143382076> Image Perms", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+        {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
+    effect: async (message: Message): Promise<string> => {
+        if(message.member?.roles.cache.get(offTopicImageRole) !== undefined) {
+            return "You already have permission to post images in #general-off-topic";
+        }
+        await message.member?.roles.add(offTopicImageRole);
+        await message.channel.send("You can now post images in <#818595825143382076>. Please don't turn it into <#789106617407766548> 2.0 thanks.");
+        return "";
+    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+        return "This shopItem doesn't implement any scheduled events.";
+    },
+    requiresTarget: false, 
+    description: "Gain the unholy power of posting images and embedding links in <#818595825143382076> and become an <@&" + offTopicImageRole + ">" 
+    }],
+
 
 
     ["muteLong", {name: "Mute Member (LONG)", basePrice: 75, roleDiscounts: [],
