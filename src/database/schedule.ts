@@ -33,7 +33,7 @@ export {scheduledEvent};
 // NEVER call this function outside of /index.ts
 export async function scheduleLoop() {
     while(true) {
-        console.log("Checking for scheduled events");
+        //console.log("Checking for scheduled events");
         const scheduledItems: Array<ScheduledEvent> = await scheduledEvent.find({});
         await scheduledItems.forEach(async (event) => {
             if(event.triggerTime.getTime() < Date.now()) {
@@ -70,6 +70,7 @@ export async function createScheduledEvent(shopItem: string, userID: string, gui
     }
     const dbNewEvent = new scheduledEvent(newEvent);
     await dbNewEvent.save();
+    console.log("Event \"" + newEvent.shopItem + "\" scheduled for user " + userID + " at " + newEvent.triggerTime);
     return true;
     // TODO: new mongoose.Types.ObjectId().toHexString() Use this in creation 
 }
