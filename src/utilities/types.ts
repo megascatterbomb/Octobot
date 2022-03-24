@@ -1,7 +1,7 @@
 import { Message, User } from "discord.js";
 
 export enum Roles {
-    gamerGod = "658160914331336724",
+    gamerGod = "789100430964949022",
     gamerPolice = "789099931889041409",
     memeMachine = "835077108699103253",
     famousArtist = "818715240707522580",
@@ -9,7 +9,9 @@ export enum Roles {
     gigaGamer = "813904207115059222"
 }
 
-export const nickNameRole: string = "657356477907992596";
+export const nickNameRole: string = "956338276833312819";
+export const funnyMuteRole: string = "956338504646950942";
+export const cringeMuteRole: string = "814895755886198814";
 
 export type ShopItem = {
     name: string,
@@ -20,7 +22,8 @@ export type ShopItem = {
     // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
     effect: (message: Message, ...args: any[]) => Promise<string>,
     scheduledEvent: null | ((userID: string, guildID: string) => Promise<string>),
-    description: string
+    description: string,
+    requiresTarget: boolean
 }
 
 //let test: ShopItem = {name: "test", basePrice: 100, roleDiscounts: [], effect: async (initiator: User, user2: User) => console.log("Test")}; 

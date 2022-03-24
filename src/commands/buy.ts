@@ -11,6 +11,7 @@ import {
     Client,
     Described,
     StringType,
+    UserType,
 } from "@frasermcc/overcord";
 import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedOptions, Role, User } from "discord.js";
 import { getUserBalance, subtractBalance } from "../database/octobuckBalance";
@@ -25,8 +26,11 @@ import ShopCommand from "./shop";
 export default class BuyCommand extends Command {
     @Argument({type: new IntegerType(), description: "The item to buy", optional: true})
     itemNum!: number
+    @Argument({type: new UserType() || undefined, description: "User to target (required for some items)", optional: true})
+    target!: User
 
     async execute(message: Message, client: Client) {
+        const target = this.target ?? null; 
         if(this.itemNum === undefined) {
             new ShopCommand().execute(message, client);
             return;
@@ -34,11 +38,17 @@ export default class BuyCommand extends Command {
         const currentBalance: number = await getUserBalance(message.author) ?? 0;
         const shopItem: ShopItem = shopItems.get(Array.from(shopItems.keys())[this.itemNum - 1]) as ShopItem;
         const { specialRole, discountPrice } = await (await getPricingInfoForUser(message.author, message.guild, shopItem));
+        const requiresTarget: boolean = shopItem.requiresTarget;
+        if(requiresTarget && target === null) {
+            throw new Error("You need to provide a target for this item. Syntax: $buy " + this.itemNum + " @Target");
+        } else if(!requiresTarget && target !== null) {
+            throw new Error("This item does not require a target. Syntax: $buy " + this.itemNum);
+        }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
             message.channel.send({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}) 
         } else if(currentBalance >= discountPrice) {
-            const err: string = await shopItem.effect(message);
+            const err: string = await shopItem.effect(message, target);
             if(err === "") {
                 await subtractBalance(message.author, discountPrice);
             } else {
