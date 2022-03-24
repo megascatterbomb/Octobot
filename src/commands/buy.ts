@@ -20,6 +20,8 @@ import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
 import ShopCommand from "./shop";
 
+export let shopOpen: boolean = true;
+
 @Alias("buy")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Purchase a specified item from the shop ($shop to view)")
@@ -30,6 +32,10 @@ export default class BuyCommand extends Command {
     target!: User
 
     async execute(message: Message, client: Client) {
+        if(!shopOpen) {
+            message.channel.send("Sorry, the shop is closed. Come back later.");
+            return;
+        }
         const target = this.target ?? null; 
         if(this.itemNum === undefined) {
             new ShopCommand().execute(message, client);
@@ -58,4 +64,8 @@ export default class BuyCommand extends Command {
             message.channel.send("You have insufficient funds to purchase this item. Your balance is $" + currentBalance +" but the item costs $" + discountPrice)
         }
     }
+}
+
+export function setShopOpen(status: boolean) {
+    shopOpen = status;
 }

@@ -16,6 +16,7 @@ import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedO
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { SpecialRole } from "../utilities/types";
+import { shopOpen } from "./buy";
 
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -23,6 +24,10 @@ import { SpecialRole } from "../utilities/types";
 export default class ShopCommand extends Command {
 
     async execute(message: Message, client: Client) {
+        if(!shopOpen) {
+            message.channel.send("Sorry, the shop is closed. Come back later.");
+            return;
+        }
         const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild)
         message.channel.send({embeds: [embed]});
     }
