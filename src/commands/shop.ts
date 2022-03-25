@@ -28,7 +28,7 @@ export default class ShopCommand extends Command {
             message.channel.send("Sorry, the shop is closed. Come back later.");
             return;
         }
-        const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild)
+        const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild);
         message.channel.send({embeds: [embed]});
     }
 }
@@ -39,13 +39,13 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
         .setColor(0xff8400)
         .setTitle("Octo GAMING Store")
         .setDescription("Purchase an item using `$buy #` eg: `$buy 1` \nFor commands that require a target, mention the target after the number: `$buy 2 @Octo`")
-        .setFooter({text: "Purchases are non-refundable. Spend wisely!"})
+        .setFooter({text: "Purchases are non-refundable. Spend wisely!"});
     
     const fields: EmbedFieldData[] = [];
 
-    let userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
+    const userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
 
-    let itemID: number = 1;
+    let itemID = 1;
 
     for(const item of shopItems.values()){
 
@@ -54,12 +54,12 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
         const hasDiscount: boolean = specialRole !== "";
         
         const field = {
-            name: "\#" + itemID + ": " + item.name + " - " + (hasDiscount ? "~~$" + item.basePrice + "~~" : "$" + item.basePrice),
+            name: "#" + itemID + ": " + item.name + " - " + (hasDiscount ? "~~$" + item.basePrice + "~~" : "$" + item.basePrice),
             value: (hasDiscount ? "**<@&" + specialRole + "> special price: $" + discountPrice + "**" + "\n" : "") + item.description
         };
         fields.push(field);
         itemID++;
-    };
+    }
 
     embed.addFields(fields);
     return embed;

@@ -20,16 +20,16 @@ import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
 import ShopCommand from "./shop";
 
-export let shopOpen: boolean = true;
+export let shopOpen = true;
 
 @Alias("buy")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Purchase a specified item from the shop ($shop to view)")
 export default class BuyCommand extends Command {
     @Argument({type: new IntegerType(), description: "The item to buy", optional: true})
-    itemNum!: number
+        itemNum!: number;
     @Argument({type: new UserType() || undefined, description: "User to target (required for some items)", optional: true})
-    target!: User
+        target!: User;
 
     async execute(message: Message, client: Client) {
         if(!shopOpen) {
@@ -52,7 +52,7 @@ export default class BuyCommand extends Command {
         }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
-            message.channel.send({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}) 
+            message.channel.send({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}); 
         } else if(currentBalance >= discountPrice) {
             const err: string = await shopItem.effect(message, target);
             if(err === "") {
@@ -61,7 +61,7 @@ export default class BuyCommand extends Command {
                 throw new Error(err);
             }
         } else {
-            message.channel.send("You have insufficient funds to purchase this item. Your balance is $" + currentBalance +" but the item costs $" + discountPrice)
+            message.channel.send("You have insufficient funds to purchase this item. Your balance is $" + currentBalance +" but the item costs $" + discountPrice);
         }
     }
 }

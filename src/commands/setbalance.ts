@@ -22,10 +22,10 @@ import { getDiscordName } from "../utilities/helpers";
 @Described("Set the balance of a user")
 export default class SetBalanceCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to set the balance of"})
-    user!: User;
+        user!: User;
 
     @Argument({ type: new IntegerType(), description: "The user's new balance"})
-    amount!: number;
+        amount!: number;
 
     async execute(message: Message, client: Client) {
         const displayName: string = await getDiscordName(this.user, message, client);

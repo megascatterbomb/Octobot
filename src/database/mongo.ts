@@ -1,6 +1,5 @@
-import { MongoClient } from 'mongodb';
-import mongoose from 'mongoose';
-
+import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
 
 export default async function connectToDatabase(connectionString ?: string) {

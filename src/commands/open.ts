@@ -22,7 +22,7 @@ export default class OpenCommand extends Command {
 
     async execute(message: Message, client: Client) {
         console.log("Shop Opened"); 
-        setShopOpen(true)
+        setShopOpen(true);
         message.channel.send("Shop has been opened!");
     }
 }

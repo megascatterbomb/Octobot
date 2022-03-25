@@ -3,7 +3,8 @@ import { Intents } from "discord.js";
 import connectToDatabase from "./database/mongo";
 import path from "path";
 import { scheduleLoop } from "./database/schedule";
-require('dotenv').config();
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
 
 export let client: Client;
 
@@ -16,6 +17,6 @@ export let client: Client;
 
     const key: string = process.env.DISCORD_TOKEN ?? "invalid key";
     await client.login(key);
-    console.log("Connected to Discord")
+    console.log("Connected to Discord");
     scheduleLoop();
 })();

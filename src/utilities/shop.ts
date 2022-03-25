@@ -19,15 +19,16 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You already purchased the ability to change your nickname. Use it!";
         }
         await message.member?.roles.add(nickNameRole);
-        await message.channel.send("You have five minutes to change your nickname to whatever you want! Right click your avatar -> Edit server profile")
+        await message.channel.send("You have five minutes to change your nickname to whatever you want! Right click your avatar -> Edit server profile");
         const endDate = new Date(Date.now() + 5*60000); // five minutes from execution
         const result: string = await createScheduledEvent("nickname", message.author.id, message.guild?.id, endDate) ? "" : "An error occured scheduling the five minute window";
         return result;
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+        let member;
         try {
-            var guild = client.guilds.cache.get(guildID);
-            var member = guild?.members.cache.get(userID);
-        } catch (e){return "Failed to get information about this event"}
+            const guild = client.guilds.cache.get(guildID);
+            member = guild?.members.cache.get(userID);
+        } catch (e){return "Failed to get information about this event";}
 
         // If the role was removed manually then we don't need to do anything nor do we need to throw an error
         if(member?.roles.cache.get(nickNameRole) !== undefined) {
@@ -41,42 +42,43 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
 
 
     ["muteShort", {name: "Mute Member (short)", basePrice: 25, roleDiscounts: [],
-    effect: async (message: Message, target: User): Promise<string> => {
-        const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
-        if(targetMember === undefined) {
-            return "Targeted user is not in the server.";
-        } else if(targetMember === message.member) {
-            return "You cannot target yourself!";
-        } else if(targetMember.user.bot) {
-            return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
-            return "You cannot target Gamer Gods or Gamer Police.";
-        } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-            return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
-        } else if(await checkIfFunnyMuted(targetMember)) {
-            return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
-        }
-        const endDate = new Date(Date.now() + 15*60000); // 15 minutes from execution
-        await targetMember.roles.add(funnyMuteRole);
-        await createScheduledEvent("muteShort", targetMember.user.id, targetMember.guild.id, endDate);
-        await message.channel.send("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
-        return "";
-    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
-        try {
-            var guild = client.guilds.cache.get(guildID);
-            var member = guild?.members.cache.get(userID);
-        } catch (e){return "Failed to get information about this event"}
+        effect: async (message: Message, target: User): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+            if(targetMember === undefined) {
+                return "Targeted user is not in the server.";
+            } else if(targetMember === message.member) {
+                return "You cannot target yourself!";
+            } else if(targetMember.user.bot) {
+                return "You cannot target a bot.";
+            } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
+                return "You cannot target Gamer Gods or Gamer Police.";
+            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
+                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(await checkIfFunnyMuted(targetMember)) {
+                return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
+            }
+            const endDate = new Date(Date.now() + 15*60000); // 15 minutes from execution
+            await targetMember.roles.add(funnyMuteRole);
+            await createScheduledEvent("muteShort", targetMember.user.id, targetMember.guild.id, endDate);
+            await message.channel.send("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
+            return "";
+        }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+            let member;
+            try {
+                const guild = client.guilds.cache.get(guildID);
+                member = guild?.members.cache.get(userID);
+            } catch (e){return "Failed to get information about this event";}
 
-        // If the role was removed manually then we don't need to do anything nor do we need to throw an error
-        if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
-            await member?.roles.remove(funnyMuteRole);
-            await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
-        }
-        return "";
-    },
-    requiresTarget: true, 
-    description: `Mute some sorry sucker for 15 minutes. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
-        + funnyMuteRole + `> role.` 
+            // If the role was removed manually then we don't need to do anything nor do we need to throw an error
+            if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
+                await member?.roles.remove(funnyMuteRole);
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+            }
+            return "";
+        },
+        requiresTarget: true, 
+        description: "Mute some sorry sucker for 15 minutes. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        + funnyMuteRole + "> role." 
     }],
 
 
@@ -98,42 +100,43 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
 
 
     ["muteMedium", {name: "Mute Member (medium)", basePrice: 45, roleDiscounts: [],
-    effect: async (message: Message, target: User): Promise<string> => {
-        const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
-        if(targetMember === undefined) {
-            return "Targeted user is not in the server.";
-        } else if(targetMember === message.member) {
-            return "You cannot target yourself!";
-        } else if(targetMember.user.bot) {
-            return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
-            return "You cannot target Gamer Gods or Gamer Police.";
-        } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-            return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
-        } else if(await checkIfFunnyMuted(targetMember)) {
-            return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
-        }
-        const endDate = new Date(Date.now() + 30*60000); // 30 minutes from execution
-        await targetMember.roles.add(funnyMuteRole);
-        await createScheduledEvent("muteMedium", targetMember.user.id, targetMember.guild.id, endDate);
-        await message.channel.send("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
-        return "";
-    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
-        try {
-            var guild = client.guilds.cache.get(guildID);
-            var member = guild?.members.cache.get(userID);
-        } catch (e){return "Failed to get information about this event"}
+        effect: async (message: Message, target: User): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+            if(targetMember === undefined) {
+                return "Targeted user is not in the server.";
+            } else if(targetMember === message.member) {
+                return "You cannot target yourself!";
+            } else if(targetMember.user.bot) {
+                return "You cannot target a bot.";
+            } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
+                return "You cannot target Gamer Gods or Gamer Police.";
+            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
+                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(await checkIfFunnyMuted(targetMember)) {
+                return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
+            }
+            const endDate = new Date(Date.now() + 30*60000); // 30 minutes from execution
+            await targetMember.roles.add(funnyMuteRole);
+            await createScheduledEvent("muteMedium", targetMember.user.id, targetMember.guild.id, endDate);
+            await message.channel.send("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
+            return "";
+        }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+            let member;
+            try {
+                const guild = client.guilds.cache.get(guildID);
+                member = guild?.members.cache.get(userID);
+            } catch (e){return "Failed to get information about this event";}
 
-        // If the role was removed manually then we don't need to do anything nor do we need to throw an error
-        if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
-            await member?.roles.remove(funnyMuteRole);
-            await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
-        }
-        return "";
-    },
-    requiresTarget: true, 
-    description: `Mute an even sorrier sucker for 30 minutes. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
-        + funnyMuteRole + `> role.` 
+            // If the role was removed manually then we don't need to do anything nor do we need to throw an error
+            if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
+                await member?.roles.remove(funnyMuteRole);
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+            }
+            return "";
+        },
+        requiresTarget: true, 
+        description: "Mute an even sorrier sucker for 30 minutes. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        + funnyMuteRole + "> role." 
     }],
 
 
@@ -154,44 +157,44 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-
     ["muteLong", {name: "Mute Member (LONG)", basePrice: 75, roleDiscounts: [],
-    effect: async (message: Message, target: User): Promise<string> => {
-        const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
-        if(targetMember === undefined) {
-            return "Targeted user is not in the server.";
-        } else if(targetMember === message.member) {
-            return "You cannot target yourself!";
-        } else if(targetMember.user.bot) {
-            return "You cannot target a bot."
-        } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
-            return "You cannot target Gamer Gods or Gamer Police.";
-        } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-            return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
-        } else if(await checkIfFunnyMuted(targetMember)) {
-            return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
-        }
-        const endDate = new Date(Date.now() + 60*60000); // 60 minutes from execution
-        await targetMember.roles.add(funnyMuteRole);
-        await createScheduledEvent("muteLong", targetMember.user.id, targetMember.guild.id, endDate);
-        await message.channel.send("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
-        return "";
-    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
-        try {
-            var guild = client.guilds.cache.get(guildID);
-            var member = guild?.members.cache.get(userID);
-        } catch (e){return "Failed to get information about this event"}
+        effect: async (message: Message, target: User): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+            if(targetMember === undefined) {
+                return "Targeted user is not in the server.";
+            } else if(targetMember === message.member) {
+                return "You cannot target yourself!";
+            } else if(targetMember.user.bot) {
+                return "You cannot target a bot.";
+            } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
+                return "You cannot target Gamer Gods or Gamer Police.";
+            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
+                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(await checkIfFunnyMuted(targetMember)) {
+                return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
+            }
+            const endDate = new Date(Date.now() + 60*60000); // 60 minutes from execution
+            await targetMember.roles.add(funnyMuteRole);
+            await createScheduledEvent("muteLong", targetMember.user.id, targetMember.guild.id, endDate);
+            await message.channel.send("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
+            return "";
+        }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+            let member;
+            try {
+                const guild = client.guilds.cache.get(guildID);
+                member = guild?.members.cache.get(userID);
+            } catch (e){return "Failed to get information about this event";}
 
-        // If the role was removed manually then we don't need to do anything nor do we need to throw an error
-        if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
-            await member?.roles.remove(funnyMuteRole);
-            await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
-        }
-        return "";
-    },
-    requiresTarget: true, 
-    description: `Mute the sorriest sucker you know for a whole hour. <@&` + SpecialRole.gamerGod + `> and <@&` + SpecialRole.gamerPolice + `> have immunity. Players muted with this will have the <@&`
-        + funnyMuteRole + `> role.` 
+            // If the role was removed manually then we don't need to do anything nor do we need to throw an error
+            if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
+                await member?.roles.remove(funnyMuteRole);
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+            }
+            return "";
+        },
+        requiresTarget: true, 
+        description: "Mute the sorriest sucker you know for a whole hour. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        + funnyMuteRole + "> role." 
     }],
 ]);
 
@@ -199,15 +202,15 @@ async function checkIfFunnyMuted(targetMember: GuildMember): Promise<boolean> {
     return  targetMember?.roles.cache.get(funnyMuteRole) !== undefined ||
     await getScheduledEvent(targetMember.user, targetMember.guild, "muteShort") !== null ||
     await getScheduledEvent(targetMember.user, targetMember.guild, "muteMedium") !== null ||
-    await getScheduledEvent(targetMember.user, targetMember.guild, "muteLong") !== null
+    await getScheduledEvent(targetMember.user, targetMember.guild, "muteLong") !== null;
 }
 
 export async function getPricingInfoForUser(user: User, guild: Guild | null, item: ShopItem): Promise<{specialRole: string, discountPrice: number}> {
 
     let discountPrice: number = item.basePrice;
-    let specialRole: string = "";
+    let specialRole = "";
 
-    let userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
+    const userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
     const eligibleDiscountRoles: {role: SpecialRole, dPrice: number}[] = item.roleDiscounts.filter((r) => {
         return userSpecialRoles.includes(r.role);
     });

@@ -23,7 +23,7 @@ const octobuckBalance = mongoose.model("OctobuckBalance", octobuckBalanceSchema,
 
 export {octobuckBalance};
 
-export async function registerBalance(user: User, initialBalance: number = 0): Promise<number | undefined> {
+export async function registerBalance(user: User, initialBalance = 0): Promise<number | undefined> {
 
     if(user.bot || await getUserBalance(user) !== null || initialBalance < 0) {
         return undefined;
@@ -98,7 +98,7 @@ export async function subtractBalance(user: User, amount: number): Promise<boole
     const balance = {
         user: user.id,
         balance: newBalance
-    }
+    };
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
 
@@ -111,8 +111,7 @@ export async function setBalance(user: User, amount: number): Promise<string> {
         return "Cannot set a balance below 0";
     }
 
-    let oldBalance: number;
-    oldBalance = await getUserBalance(user) ?? -1;
+    const oldBalance: number = await getUserBalance(user) ?? -1;
     if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
         return "Cannot find this user in the server";
     }

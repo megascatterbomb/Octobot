@@ -22,7 +22,7 @@ import { getDiscordName } from "../utilities/helpers";
 @Described("Get the balance of a user")
 export default class BalanceCommand extends Command {
     @Argument({ type: new UserType() , optional: true, description: "The user whos balance to return. Leave blank to check your own"})
-    user!: User;
+        user!: User;
     
     async execute(message: Message, client: Client) {
         const user: User = this.user ?? message.author;
@@ -32,7 +32,7 @@ export default class BalanceCommand extends Command {
         }
         const displayName: string = await getDiscordName(user, message, client);
 
-        let balance = await getUserBalance(user);
+        const balance = await getUserBalance(user);
 
         if(balance === null && await message.guild?.members.fetch(user)) {
             message.channel.send("Could not find the balance of that user (they do not have a balance)");

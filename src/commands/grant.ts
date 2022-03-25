@@ -22,10 +22,10 @@ import { getDiscordName } from "../utilities/helpers";
 @Permit("ADMINISTRATOR")
 export default class GrantCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to bestow Octobucks upon"})
-    user!: User;
+        user!: User;
 
     @Argument({ type: new IntegerType(), description: "Amount of Octobucks to bestow"})
-    amount!: number;
+        amount!: number;
 
     async execute(message: Message, client: Client) {
         const displayName: string = await getDiscordName(this.user, message, client);

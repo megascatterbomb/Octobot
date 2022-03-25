@@ -32,6 +32,7 @@ export {scheduledEvent};
 
 // NEVER call this function outside of /index.ts
 export async function scheduleLoop() {
+    // eslint-disable-next-line no-constant-condition
     while(true) {
         //console.log("Checking for scheduled events");
         const scheduledItems: Array<ScheduledEvent> = await scheduledEvent.find({});
@@ -67,7 +68,7 @@ export async function createScheduledEvent(shopItem: string, userID: string, gui
         shopItem: shopItem,
         triggerTime: triggerTime,
         error: false
-    }
+    };
     const dbNewEvent = new scheduledEvent(newEvent);
     await dbNewEvent.save();
     console.log("Event \"" + newEvent.shopItem + "\" scheduled for user " + userID + " at " + newEvent.triggerTime);
@@ -88,7 +89,7 @@ export async function getScheduledEvent(user: User, guild: Guild | null, itemNam
         user: user.id,
         guild: guild?.id ?? "",
         shopItem: itemName
-    }
+    };
     const dbEvent: ScheduledEvent | null = await scheduledEvent.findOne(event);
     return dbEvent;
 }

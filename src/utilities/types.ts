@@ -9,11 +9,11 @@ export enum SpecialRole {
     gigaGamer = "813904207115059222"
 }
 
-export const nickNameRole: string = "956338276833312819";
-export const funnyMuteRole: string = "956338504646950942";
-export const cringeMuteRole: string = "814895755886198814"; // Managed by Dyno, do not add/remove this role from players.
-export const offTopicImageRole: string = "956369590294818826";
-export const basementDwellerRole: string = "956369181589258280";
+export const nickNameRole = "956338276833312819";
+export const funnyMuteRole = "956338504646950942";
+export const cringeMuteRole = "814895755886198814"; // Managed by Dyno, do not add/remove this role from players.
+export const offTopicImageRole = "956369590294818826";
+export const basementDwellerRole = "956369181589258280";
 
 export type ShopItem = {
     name: string,
