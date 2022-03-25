@@ -1,21 +1,15 @@
 import {
     Alias,
     Inhibit,
-    Permit,
     Command,
     Argument,
-    BooleanType,
     IntegerType,
-    UnionType,
-    FloatType,
     Client,
     Described,
-    StringType,
     UserType,
 } from "@frasermcc/overcord";
-import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedOptions, Role, User } from "discord.js";
+import { Message, User } from "discord.js";
 import { getUserBalance, subtractBalance } from "../database/octobuckBalance";
-import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
 import ShopCommand from "./shop";

@@ -22,6 +22,7 @@ export type ShopItem = {
     // Purchases should always have a message associated with them; user and guild can be derived from this.
     // Additional arguments are the responsibility of shop item implementers to manage.
     // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effect: (message: Message, ...args: any[]) => Promise<string>,
     scheduledEvent: null | ((userID: string, guildID: string) => Promise<string>),
     description: string,
