@@ -28,7 +28,6 @@ export default class SendCommand extends ChannelCommand {
         amount!: number;
 
     async execute(message: Message, client: Client) {
-        console.log("test");
         const displayName: string = await getDiscordName(this.recipient, message, client);
         const err: string = await transferFunds(message.author, this.recipient, this.amount);
         if(err !== "") {
