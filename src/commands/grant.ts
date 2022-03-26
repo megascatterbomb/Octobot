@@ -30,8 +30,9 @@ export default class GrantCommand extends Command {
     async execute(message: Message, client: Client) {
         const displayName: string = await getDiscordName(this.user, message, client);
         const err: string = await addBalance(this.user, this.amount);
-        message.channel.send(err ?
-            "Failed to bestow octobucks: " + err :
-            "Sucessfully bestowed $" + this.amount + " to " + displayName);
+        if(err !== "") {
+            throw new Error(err);
+        }
+        message.channel.send("Sucessfully bestowed $" + this.amount + " to " + displayName);
     }
 }

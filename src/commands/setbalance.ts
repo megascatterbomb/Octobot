@@ -30,8 +30,9 @@ export default class SetBalanceCommand extends Command {
     async execute(message: Message, client: Client) {
         const displayName: string = await getDiscordName(this.user, message, client);
         const err: string = await setBalance(this.user, this.amount);
-        message.channel.send(err ?
-            "Failed to set balance: " + err :
-            "Sucessfully set balance of " + displayName + " to $" + this.amount);
+        if(err !== "") {
+            throw new Error(err);
+        }
+        message.channel.send("Sucessfully set balance of " + displayName + " to $" + this.amount);
     }
 }

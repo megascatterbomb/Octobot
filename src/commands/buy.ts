@@ -12,6 +12,7 @@ import { Message, User } from "discord.js";
 import { getUserBalance, subtractBalance } from "../database/octobuckBalance";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
+import ChannelCommand from "../extensions/channelCommand";
 import ShopCommand from "./shop";
 
 export let shopOpen = true;
@@ -19,7 +20,7 @@ export let shopOpen = true;
 @Alias("buy")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Purchase a specified item from the shop ($shop to view)")
-export default class BuyCommand extends Command {
+export default class BuyCommand extends ChannelCommand {
     @Argument({type: new IntegerType(), description: "The item to buy", optional: true})
         itemNum!: number;
     @Argument({type: new UserType() || undefined, description: "User to target (required for some items)", optional: true})

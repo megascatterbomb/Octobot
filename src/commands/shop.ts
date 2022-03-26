@@ -13,6 +13,7 @@ import {
     StringType,
 } from "@frasermcc/overcord";
 import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedOptions, Role, User } from "discord.js";
+import ChannelCommand from "../extensions/channelCommand";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { SpecialRole } from "../utilities/types";
@@ -21,7 +22,7 @@ import { shopOpen } from "./buy";
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("View items available for purchase")
-export default class ShopCommand extends Command {
+export default class ShopCommand extends ChannelCommand {
 
     async execute(message: Message, client: Client) {
         if(!shopOpen) {

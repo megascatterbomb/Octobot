@@ -15,6 +15,12 @@ export const cringeMuteRole = "814895755886198814"; // Managed by Dyno, do not a
 export const offTopicImageRole = "956369590294818826";
 export const basementDwellerRole = "956369181589258280";
 
+export const allowedChannels: string[] = [
+    "574157660488859670", // Beta testing channel
+    "814881168263872532", // Gamer Police bot-commands
+    "957061767920513164" // Octobot commands
+];
+
 export type ShopItem = {
     name: string,
     basePrice: number,

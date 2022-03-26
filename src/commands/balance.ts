@@ -10,11 +10,12 @@ import {
 import { Message, User } from "discord.js";
 import { getUserBalance } from "../database/octobuckBalance";
 import { getDiscordName } from "../utilities/helpers";
+import ChannelCommand from "../extensions/channelCommand";
 
 @Alias("balance", "bal", "money")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Get the balance of a user")
-export default class BalanceCommand extends Command {
+export default class BalanceCommand extends ChannelCommand {
     @Argument({ type: new UserType() , optional: true, description: "The user whos balance to return. Leave blank to check your own"})
         user!: User;
     
