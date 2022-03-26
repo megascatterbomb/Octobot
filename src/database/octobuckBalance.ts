@@ -139,7 +139,11 @@ export async function transferFunds(sender: User, recipient: User, amount: numbe
         return "You must send at least 1 Octobuck";
     } else if(await getUserBalance(sender) === null) {
         return "You don't have a balance at all, how are you going to transfer funds when you're broke?";
-    } else if(await getUserBalance(sender) ?? -1 < amount) {
+    } else if(sender.id === recipient.id) {
+        return "You cannot send Octobucks to yourself";
+    } else if(recipient.bot) {
+        return "You cannot send Octobucks to a bot";
+    }else if((await getUserBalance(sender) ?? -1) < amount) {
         return "You have insufficient funds to transfer this amount of money";
     }
     // At this point we know we can transfer the money.
