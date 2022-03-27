@@ -35,22 +35,22 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         .setFooter({text: "Octobot built and maintained by megascatterbomb"});
     
     const fields: EmbedFieldData[] = [{
-        name: "`$balance, $bal, $money` - Args: `Target (User)`",
+        name: "$balance,  $bal,  $money  -  Args: `Target (User)`",
         value: "Get the balance of a user. Running the command with no target checks your own balance. Please note that if you've never interacted with the economy you won't have a balance."
     },{
-        name: "`$buy` - Args: `Shop Item (number), Target (User)`",
+        name: "$buy  -  Args: `Shop Item (number), Target (User)`",
         value: "Buy an item from the shop. Some items require a target that the item will be used on."
     },{
-        name: "`$help, $?` - Args: `none`",
+        name: "$help,  $?  -  Args: `none`",
         value: "Display this help menu."
     },{
-        name: "`$ping, $hello, $test` - Args: `none`",
+        name: "$ping,  $hello, $test  -  Args: `none`",
         value: "Check if Octobot is alive and well."
     },{
-        name: "`$send, $trade` - Args: `Recipient (User), Amount (number)`",
+        name: "$send,  $trade  -  Args: `Recipient (User), Amount (number)`",
         value: "Send someone your precious Octobucks."
     },{
-        name: "`$shop` - Args: `none`",
+        name: "$shop  -  Args: `none`",
         value: "View items available for purchase, including any special discounts you're eligible for."
     },
     ];
