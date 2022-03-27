@@ -154,8 +154,8 @@ export async function transferFunds(sender: User, recipient: User, amount: numbe
             return regResult;
         }
     }
-    await logUserTransaction(sender, recipient, amount);
     await addBalance(recipient, amount);
     await subtractBalance(sender, amount);
+    await logUserTransaction(sender, recipient, amount);
     return "";
 }

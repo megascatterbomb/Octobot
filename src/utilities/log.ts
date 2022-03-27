@@ -8,14 +8,14 @@ export async function logUserTransaction(sender: User | null, receiver: User, am
     const senderString: string = sender !== null ? "<@" + sender.id + ">" : "The Gamer Gods";
     const receiverString: string =  "<@" + receiver.id + ">";
 
-    (client.channels.cache.get(logChannel) as TextChannel).send({content: "User Transaction: " + senderString + 
+    getLoggingChannel().send({content: "User Transaction: " + senderString + 
             " sent " + receiverString + " $" + amount, allowedMentions: {roles: [], users: []}});
 }
 
 export async function logShopTransaction(customer: User, shopItemIndex: number, pricePaid: number): Promise<void> {
     const customerString: string = "<@" + customer.id + ">";
 
-    (client.channels.cache.get(logChannel) as TextChannel).send({content: "Shop Transaction: " + customerString + 
+    getLoggingChannel().send({content: "Shop Transaction: " + customerString + 
             " bought " + Array.from(shopItems.values())[shopItemIndex-1].name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
 }
 
@@ -25,5 +25,9 @@ export async function logBalanceChange(user: User, amount: number, oldBalance?: 
 
     const messageContent: string ="Balance Change: <@" + user.id + "> changed by " + amountString + (detailed ? " (" + oldBalance + " -> " + newBalance + ")" : "");
  
-    (client.channels.cache.get(logChannel) as TextChannel).send({content: messageContent, allowedMentions: {roles: [], users: []}});
+    getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
+}
+
+function getLoggingChannel() {
+    return process.env.ENVIRONMENT === "PRODUCTION" ? client.channels.cache.get(logChannel) as TextChannel: client.channels.cache.get("574157660488859670") as TextChannel;
 }

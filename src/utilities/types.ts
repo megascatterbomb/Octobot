@@ -21,7 +21,7 @@ export const allowedChannels: string[] = [
     "957061767920513164" // Octobot commands
 ];
 
-export const logChannel: string = process.env.ENVIRONMENT === "PRODUCTION" ? "947220771913228288" : "574157660488859670";
+export const logChannel = "947220771913228288";
 
 export type ShopItem = {
     name: string,

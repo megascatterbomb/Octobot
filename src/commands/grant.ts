@@ -15,6 +15,7 @@ import {
 import { Message, User } from "discord.js";
 import { addBalance, registerBalance } from "../database/octobuckBalance";
 import { getDiscordName } from "../utilities/helpers";
+import { logUserTransaction } from "../utilities/log";
 
 @Alias("grant", "bestow")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -33,6 +34,7 @@ export default class GrantCommand extends Command {
         if(err !== "") {
             throw new Error(err);
         }
+        logUserTransaction(null, this.user, this.amount);
         message.channel.send("Sucessfully bestowed $" + this.amount + " to " + displayName);
     }
 }

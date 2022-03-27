@@ -52,8 +52,8 @@ export default class BuyCommand extends ChannelCommand {
         } else if(currentBalance >= discountPrice) {
             const err: string = await shopItem.effect(message, target);
             if(err === "") {
-                await logShopTransaction(message.author, this.itemNum, discountPrice);
                 await subtractBalance(message.author, discountPrice);
+                await logShopTransaction(message.author, this.itemNum, discountPrice);
             } else {
                 throw new Error(err);
             }
