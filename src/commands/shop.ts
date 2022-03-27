@@ -39,7 +39,7 @@ async function generateRichEmbed(user: User, guild: Guild | null): Promise<Messa
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
         .setTitle("Octo GAMING Store")
-        .setDescription("Purchase an item using `$buy #` eg: `$buy 1` \nFor commands that require a target, mention the target after the number: `$buy 2 @Octo`")
+        .setDescription("Purchase an item using `$buy #` eg: `$buy 1` \nFor commands that require a target, mention the target after the number:\n`$buy 2 @Octo`")
         .setFooter({text: "Purchases are non-refundable. Spend wisely!"});
     
     const fields: EmbedFieldData[] = [];

@@ -37,7 +37,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "";
     },
     requiresTarget: false, 
-    description: "Gives you permission to change your nickname for 5 minutes. Once that time's up you're stuck with whatever you chose!"
+    description: "- Gives you permission to change your nickname for 5 minutes.\n- Once that time's up you're stuck with whatever you chose!"
     }],
 
 
@@ -77,7 +77,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "";
         },
         requiresTarget: true, 
-        description: "Mute some sorry sucker for 15 minutes. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        description: "- Mute some sorry sucker for 15 minutes.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
 
@@ -95,7 +95,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "This shopItem doesn't implement any scheduled events.";
     },
     requiresTarget: false, 
-    description: "These keys will give you access to the dusty, cramped corners of Octo's basement. Become a <@&" + basementDwellerRole + "> like us!" 
+    description: "- These keys will give you access to the dusty, cramped corners of Octo's basement.\n- Become a <@&" + basementDwellerRole + "> like us!" 
     }],
 
 
@@ -135,7 +135,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "";
         },
         requiresTarget: true, 
-        description: "Mute an even sorrier sucker for 30 minutes. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        description: "- Mute an even sorrier sucker for 30 minutes.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
 
@@ -153,7 +153,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "This shopItem doesn't implement any scheduled events.";
     },
     requiresTarget: false, 
-    description: "Gain the unholy power of posting images and embedding links in <#818595825143382076> and become an <@&" + offTopicImageRole + ">" 
+    description: "- Gain the unholy power of posting images and embedding links in <#818595825143382076> and become an <@&" + offTopicImageRole + ">" 
     }],
 
 
@@ -193,7 +193,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "";
         },
         requiresTarget: true, 
-        description: "Mute the sorriest sucker you know for a whole hour. <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity. Players muted with this will have the <@&"
+        description: "- Mute the sorriest sucker you know for a whole hour.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
 ]);
