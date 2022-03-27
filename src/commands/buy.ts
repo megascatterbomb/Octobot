@@ -14,6 +14,7 @@ import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
 import ChannelCommand from "../extensions/channelCommand";
 import ShopCommand from "./shop";
+import { logShopTransaction } from "../utilities/log";
 
 export let shopOpen = true;
 
@@ -51,6 +52,7 @@ export default class BuyCommand extends ChannelCommand {
         } else if(currentBalance >= discountPrice) {
             const err: string = await shopItem.effect(message, target);
             if(err === "") {
+                await logShopTransaction(message.author, this.itemNum, discountPrice);
                 await subtractBalance(message.author, discountPrice);
             } else {
                 throw new Error(err);

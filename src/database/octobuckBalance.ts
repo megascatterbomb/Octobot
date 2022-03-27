@@ -2,6 +2,7 @@ import { IntegerType } from "@frasermcc/overcord";
 import { User } from "discord.js";
 import mongoose from "mongoose";
 import assert from "node:assert";
+import { logUserTransaction, logBalanceChange } from "../utilities/log";
 const Schema = mongoose.Schema;
 
 // Octobuck Balance Schema
@@ -83,7 +84,7 @@ export async function addBalance(user: User, amount: number): Promise<string> {
     };
 
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
-
+    await logBalanceChange(user, amount, oldBalance, newBalance);
     return "";
 }
 
@@ -108,7 +109,7 @@ export async function subtractBalance(user: User, amount: number): Promise<boole
     };
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
-
+    await logBalanceChange(user, -amount, oldBalance, newBalance);
     return true;
 }
 
@@ -130,7 +131,7 @@ export async function setBalance(user: User, amount: number): Promise<string> {
     };
 
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
-
+    await logBalanceChange(user, amount, oldBalance, newBalance);
     return "";
 }
 
@@ -153,6 +154,7 @@ export async function transferFunds(sender: User, recipient: User, amount: numbe
             return regResult;
         }
     }
+    await logUserTransaction(sender, recipient, amount);
     await addBalance(recipient, amount);
     await subtractBalance(sender, amount);
     return "";
