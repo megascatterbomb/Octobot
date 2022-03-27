@@ -7,7 +7,7 @@ export default abstract class ChannelCommand extends Command {
         shouldBlock: boolean;
         msg?: string;
     }> {
-        if(allowedChannels.includes(message.channelId)) {
+        if(allowedChannels.includes(message.channelId) || message.member?.permissions.has("ADMINISTRATOR")) {
             return {shouldBlock: false};
         }
         return {shouldBlock: true, msg: "You cannot use Octobot in this channel"};
