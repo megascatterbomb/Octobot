@@ -23,8 +23,17 @@ export async function logBalanceChange(user: User, amount: number, oldBalance?: 
     const detailed: boolean = oldBalance !== undefined && newBalance !== undefined && amount === newBalance - oldBalance;
     const amountString: string = amount < 0 ? "-$" + Math.abs(amount) : "$" + Math.abs(amount);
 
-    const messageContent: string ="Balance Change: <@" + user.id + "> changed by " + amountString + (detailed ? " (" + oldBalance + " -> " + newBalance + ")" : "");
+    const messageContent: string ="Balance Change: <@" + user.id + "> balance changed by " + amountString + (detailed ? " (" + oldBalance + " -> " + newBalance + ")" : "");
  
+    getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
+}
+
+export async function logBalanceSet(user: User, newBalance: number, oldBalance: number): Promise<void> {
+    const amount: number = newBalance - oldBalance;
+    await logBalanceChange(user, amount, oldBalance, newBalance);
+
+    const messageContent: string ="Balance Set By Gamer God: <@" + user.id + "> balance set to " + newBalance;
+
     getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
 }
 

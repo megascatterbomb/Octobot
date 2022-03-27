@@ -2,7 +2,7 @@ import { IntegerType } from "@frasermcc/overcord";
 import { User } from "discord.js";
 import mongoose from "mongoose";
 import assert from "node:assert";
-import { logUserTransaction, logBalanceChange } from "../utilities/log";
+import { logUserTransaction, logBalanceChange, logBalanceSet } from "../utilities/log";
 const Schema = mongoose.Schema;
 
 // Octobuck Balance Schema
@@ -131,7 +131,7 @@ export async function setBalance(user: User, amount: number): Promise<string> {
     };
 
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
-    await logBalanceChange(user, amount, oldBalance, newBalance);
+    await logBalanceSet(user, newBalance, oldBalance);
     return "";
 }
 
