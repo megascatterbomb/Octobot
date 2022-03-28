@@ -29,6 +29,9 @@ export default class GrantCommand extends Command {
         amount!: number;
 
     async execute(message: Message, client: Client) {
+        if(this.amount <= 0) {
+            throw new Error("You cannot grant a balance of 0");
+        }
         const displayName: string = await getDiscordName(this.user, message, client);
         const err: string = await addBalance(this.user, this.amount);
         if(err !== "") {
