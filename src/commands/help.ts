@@ -32,7 +32,7 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         .setColor(0xff8400)
         .setTitle("Octo GAMING Help Menu")
         .setDescription("Server prefix is `$`. These commands can only be run in the <#957061767920513164> channel. Some commands have multiple aliases.")
-        .setFooter({text: "Octobot built and maintained by megascatterbomb"});
+        .setFooter({text: "Check the pinned messages to learn how to earn Octobucks.\nOctobot built and maintained by megascatterbomb."});
     
     const fields: EmbedFieldData[] = [{
         name: "$balance,  $bal,  $money  -  Args: `Target (User)`",
@@ -44,7 +44,7 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$help,  $?  -  Args: `none`",
         value: "Display this help menu."
     },{
-        name: "$ping,  $hello, $test  -  Args: `none`",
+        name: "$ping,  $hello,  $test  -  Args: `none`",
         value: "Check if Octobot is alive and well."
     },{
         name: "$send,  $trade  -  Args: `Recipient (User), Amount (number)`",
