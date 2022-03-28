@@ -30,11 +30,10 @@ export default class BalanceCommand extends ChannelCommand {
         const balance = await getUserBalance(user);
 
         if(balance === null && await message.guild?.members.fetch(user)) {
-            message.channel.send("Could not find the balance of that user (they do not have a balance)");
+            message.channel.send("Balance of " + displayName + ": $0");
             return;
         } else if (balance === null) {
-            message.channel.send("Could not find the balance of that user (they are not in the server)");
-            return;
+            throw new Error("Could not find the balance of that user (they are not in the server)");
         }
 
         message.channel.send("Balance of " + displayName + ": $" + balance);

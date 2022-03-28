@@ -58,7 +58,7 @@ export default class BuyCommand extends ChannelCommand {
                 throw new Error(err);
             }
         } else {
-            message.channel.send("You have insufficient funds to purchase this item. Your balance is $" + currentBalance +" but the item costs $" + discountPrice);
+            throw new Error("You have insufficient funds to purchase this item. Your balance is $" + currentBalance +" but the item costs $" + discountPrice);
         }
     }
 }

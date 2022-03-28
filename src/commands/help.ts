@@ -36,7 +36,7 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
     
     const fields: EmbedFieldData[] = [{
         name: "$balance,  $bal,  $money  -  Args: `Target (User)`",
-        value: "Get the balance of a user. Running the command with no target checks your own balance. Please note that if you've never interacted with the economy you won't have a balance."
+        value: "Get the balance of a user. Running the command with no target checks your own balance."
     },{
         name: "$buy  -  Args: `Shop Item (number), Target (User)`",
         value: "Buy an item from the shop. Some items require a target that the item will be used on."
