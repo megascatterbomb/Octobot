@@ -9,6 +9,7 @@ const EvalEvent: DiscordEvent<"messageCreate"> = {
         }
         if(!client.isOwner(message.author.id)) {
             message.channel.send("You do not have permission to $eval");
+            return;
         }
         const command = message.content.substring(6);
         try {
