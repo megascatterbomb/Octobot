@@ -52,6 +52,12 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
     },{
         name: "$shop  -  Args: `none`",
         value: "View items available for purchase, including any special discounts you're eligible for."
+    },{
+        name: "$uptime  -  Args: `none`",
+        value: "Check how long the bot has been up for."
+    },{
+        name: "$leaderboard,  $rich  -  Args: `Page (number)`",
+        value: "View the richest players on the server."
     },
     ];
 
