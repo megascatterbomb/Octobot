@@ -42,13 +42,11 @@ async function generateRichEmbed(balances: Balance[], page: number, message: Mes
     })));
 
     let fieldValue = "```";
-    let positionValue = 1;
     for(const bal of balances){
         const name: string = await getDiscordNameFromID(bal.user, message.client, message?.guild); 
         const spacesCount = longestNameLength - name.length;
         const spaces: string = spacesCount > 0 ? " ".repeat(longestNameLength - name.length) : "";
         fieldValue += "\n" + name + " " + spaces + "$" + bal.balance;
-        positionValue++;
     }
     fieldValue.trimEnd();
     fieldValue += " ```";
