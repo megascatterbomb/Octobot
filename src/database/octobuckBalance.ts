@@ -1,4 +1,5 @@
 import { IntegerType } from "@frasermcc/overcord";
+import { UV_FS_O_FILEMAP } from "constants";
 import { User } from "discord.js";
 import mongoose from "mongoose";
 import assert from "node:assert";
@@ -7,7 +8,7 @@ const Schema = mongoose.Schema;
 
 // Octobuck Balance Schema
 
-interface Balance {
+export interface Balance {
     user: string,
     balance: number
 }
@@ -20,7 +21,7 @@ const octobuckBalanceSchema = new Schema({
     collection: "OctobuckBalance"
 });
 
-const octobuckBalance = mongoose.model("OctobuckBalance", octobuckBalanceSchema, "OctobuckBalance");
+const octobuckBalance: mongoose.Model<Balance> = mongoose.model("OctobuckBalance", octobuckBalanceSchema, "OctobuckBalance");
 
 export {octobuckBalance};
 
@@ -51,8 +52,8 @@ export async function registerBalance(user: User, initialBalance = 0): Promise<s
 
 export async function getUserBalance(user: User): Promise<number | null> {
     try {
-        const {balance: balanceEntry} = await octobuckBalance.findOne({user: user.id});
-        return balanceEntry;
+        const balance: Balance | null = await octobuckBalance.findOne({user: user.id});
+        return balance?.balance ?? null;
     } catch {
         return null;
     }
@@ -158,4 +159,13 @@ export async function transferFunds(sender: User, recipient: User, amount: numbe
     await subtractBalance(sender, amount);
     await logUserTransaction(sender, recipient, amount);
     return "";
+}
+
+export async function getAllBalances(page: number): Promise<Balance[]> {
+
+    const balances: Balance[] = await octobuckBalance.aggregate([{$sort: {balance: -1}}, {$skip: (page-1) * 20}, {$limit: 20}, {$match: {balance: {$gt: 0}}}]);
+    if(balances.length === 0) {
+        throw new Error("This page does not exist. Max pages: " + (Math.ceil(octobuckBalance.length/20)));
+    }
+    return balances;
 }
