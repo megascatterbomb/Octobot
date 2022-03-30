@@ -7,6 +7,7 @@ import {
     Described,
 } from "@frasermcc/overcord";
 import { EmbedFieldData, GuildMember, Message, MessageEmbed, User } from "discord.js";
+import { nextTick } from "process";
 import { client } from "..";
 import { Balance, getAllBalances } from "../database/octobuckBalance";
 import ChannelCommand from "../extensions/channelCommand";
@@ -34,18 +35,24 @@ async function generateRichEmbed(balances: Balance[], page: number, message: Mes
         .setColor(0xff8400)
         .setTitle("Octo GAMING Leaderboard")
         .setDescription("The richest people you can find!");
-    let fieldUserValue = "```";
-    let fieldBalanceValue = "```";
-    for(const bal of balances){
-        fieldUserValue += "\n" + await getDiscordNameFromID(bal.user, message.client, message?.guild) + ":";
-        fieldBalanceValue +=  "\n$" + bal.balance;
-    }
-    fieldUserValue.trimEnd();
-    fieldBalanceValue.trimEnd();
-    fieldUserValue += " ```";
-    fieldBalanceValue += " ```";
 
-    embed.addField("Page " + page, fieldUserValue, true);
-    embed.addField("Balance: ", fieldBalanceValue, true);
+    // Need this to know how many spaces to use.
+    const longestNameLength: number = Math.max(...await Promise.all(balances.map<Promise<number>>(async (e: Balance) => {
+        return (await getDiscordNameFromID(e.user, message.client, message.guild)).length;
+    })));
+
+    let fieldValue = "```";
+    let positionValue = 1;
+    for(const bal of balances){
+        const name: string = await getDiscordNameFromID(bal.user, message.client, message?.guild); 
+        const spacesCount = longestNameLength - name.length;
+        const spaces: string = spacesCount > 0 ? " ".repeat(longestNameLength - name.length) : "";
+        fieldValue += "\n" + name + " " + spaces + "$" + bal.balance;
+        positionValue++;
+    }
+    fieldValue.trimEnd();
+    fieldValue += " ```";
+
+    embed.addField("Page " + page, fieldValue);
     return embed;
 }
