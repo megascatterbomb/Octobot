@@ -163,7 +163,7 @@ export async function transferFunds(sender: User, recipient: User, amount: numbe
 
 export async function getAllBalances(page: number): Promise<Balance[]> {
 
-    const pageLimit = 10;
+    const pageLimit = 20;
 
     const balances: Balance[] = await octobuckBalance.aggregate([{$sort: {balance: -1}}, {$skip: (page-1) * pageLimit}, {$limit: pageLimit}, {$match: {balance: {$gt: 0}}}]);
     if(balances.length === 0) {

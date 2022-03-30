@@ -7,9 +7,10 @@ import {
     Described,
 } from "@frasermcc/overcord";
 import { EmbedFieldData, GuildMember, Message, MessageEmbed, User } from "discord.js";
+import { client } from "..";
 import { Balance, getAllBalances } from "../database/octobuckBalance";
 import ChannelCommand from "../extensions/channelCommand";
-import { getDiscordName } from "../utilities/helpers";
+import { getDiscordNameFromID } from "../utilities/helpers";
 
 @Alias("leaderboard", "rich")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
@@ -22,23 +23,29 @@ export default class LeaderboardCommand extends ChannelCommand {
         if(this.page === undefined) {
             this.page = 1;
         }
-        const embed: MessageEmbed = await generateRichEmbed(await getAllBalances(this.page), this.page);
+        const embed: MessageEmbed = await generateRichEmbed(await getAllBalances(this.page), this.page, message);
         message.channel.send({embeds: [embed]});
     }
 }
 
-async function generateRichEmbed(balances: Balance[], page: number): Promise<MessageEmbed> {
+async function generateRichEmbed(balances: Balance[], page: number, message: Message): Promise<MessageEmbed> {
 
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
         .setTitle("Octo GAMING Leaderboard")
         .setDescription("The richest people you can find!");
-    
-    let fieldValue = "";
-
+    let fieldUserValue = "```";
+    let fieldBalanceValue = "```";
     for(const bal of balances){
-        fieldValue += "<@" + bal.user + "> : $" + bal.balance + "\n";
+        fieldUserValue += "\n" + await getDiscordNameFromID(bal.user, message.client, message?.guild) + ":";
+        fieldBalanceValue +=  "\n$" + bal.balance;
     }
-    embed.addField("Page " + page, fieldValue);
+    fieldUserValue.trimEnd();
+    fieldBalanceValue.trimEnd();
+    fieldUserValue += " ```";
+    fieldBalanceValue += " ```";
+
+    embed.addField("Page " + page, fieldUserValue, true);
+    embed.addField("Balance: ", fieldBalanceValue, true);
     return embed;
 }

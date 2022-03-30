@@ -21,3 +21,7 @@ export async function convertToRolesEnum(rolesIn: Collection<string, Role>): Pro
 export async function getDiscordName(user: User, message: Message, client: Client): Promise<string> {
     return await (await message.guild?.members.fetch(user.id))?.displayName ?? user.username;
 }
+
+export async function getDiscordNameFromID(user: string, client: Client, guild?: Guild | null): Promise<string> {
+    return guild?.members.cache.get(user)?.displayName ?? client.users.cache.get(user)?.username ?? "<could not get name>";
+}
