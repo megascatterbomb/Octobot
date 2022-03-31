@@ -23,7 +23,7 @@ const blockedCategories: string[] = ["789109056756776971", "789098821875531788"]
 
 const RandomDropEvent: DiscordEvent<"messageCreate"> = {
     callback: async (message) => {
-        if(message.author.bot || blockedCategories.includes(message.channel.id) || blockedCategories.includes((message.channel as TextChannel | ThreadChannel)?.parent?.id ?? "")) {
+        if(message.author.bot || blockedChannels.includes(message.channel.id) || blockedCategories.includes((message.channel as TextChannel | ThreadChannel)?.parent?.id ?? "")) {
             return;
         }
 
@@ -53,9 +53,8 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
             if(!claimed) {
                 claimed = true;
                 counter = Math.max(counterStart, Math.floor(counter/1.1));
-                octobuckMessage.channel.send("<@" + user.id + "> has claimed $" + valueToSend + "!");
+                octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
                 addBalance(user, valueToSend);
-                octobuckMessage.delete();
             }
         });
 
