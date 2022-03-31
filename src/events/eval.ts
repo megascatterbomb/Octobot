@@ -1,5 +1,4 @@
 import { Client, DiscordEvent } from "@frasermcc/overcord";
-import { object } from "zod";
 import { client } from "..";
 
 const EvalEvent: DiscordEvent<"messageCreate"> = {
