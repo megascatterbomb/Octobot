@@ -13,11 +13,13 @@ const reactionEmoji = "Octocoin";
 // Order least probable to most probable.
 const probs: {prob: number, val: number}[] = [
     {prob: 1, val: 100},
+    {prob: 2, val: 50},
     {prob: 4, val: 30},
+    {prob: 4, val: 28},
     {prob: 6, val: 20},
-    {prob: 21, val: 6},
-    {prob: 25, val: 5},
-    {prob: 43, val: 3}
+    {prob: 20, val: 6},
+    {prob: 24, val: 5},
+    {prob: 39, val: 3}
 ];
 
 const blockedChannels: string[] = ["828771529469853766", "887720173136658507", "789098821875531789"]; // Secret links, secret artist channel, spam chat
@@ -64,7 +66,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         reactionCollector.on("end", async collected => {
             if(!claimed && collected.size === 0) {
                 const ruinedGifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_ruined.gif");
-                await octobuckMessage.channel.send({content: "Nobody claimed the Octobucks in time. What a shame!", files: [ruinedGifPath]});
+                await octobuckMessage.channel.send({content: "Nobody claimed the " + valueToSend + " Octobucks in time. What a shame!", files: [ruinedGifPath]});
                 await octobuckMessage.delete();
             }
         });
