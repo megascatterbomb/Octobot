@@ -5,7 +5,8 @@ import path from "path";
 import { addBalance, octobuckBalance } from "../database/octobuckBalance";
 import { logRandomDropClaim } from "../utilities/log";
 
-const counterStart = 1000; // Higher number = more rare
+const counterStart = 980; // Should be equal or under counterThreshold
+const counterThreshold = 1000; // RNG has to exceed this threshold to trigger
 let counter = counterStart;
 
 const reactionEmoji = "Octocoin";
@@ -35,7 +36,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         const guild = message.guild as Guild;
 
         counter++;
-        const dropOctobuck = Math.random() * counter > counterStart;
+        const dropOctobuck = Math.random() * counter > counterThreshold;
         if(!dropOctobuck) {
             return;
         }        
