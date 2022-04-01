@@ -13,10 +13,11 @@ const reactionEmoji = "Octocoin";
 // Order least probable to most probable.
 const probs: {prob: number, val: number}[] = [
     {prob: 1, val: 100},
-    {prob: 7, val: 20},
+    {prob: 4, val: 30},
+    {prob: 6, val: 20},
     {prob: 21, val: 6},
-    {prob: 27, val: 5},
-    {prob: 44, val: 3}
+    {prob: 25, val: 5},
+    {prob: 43, val: 3}
 ];
 
 const blockedChannels: string[] = ["828771529469853766", "887720173136658507", "789098821875531789"]; // Secret links, secret artist channel, spam chat
