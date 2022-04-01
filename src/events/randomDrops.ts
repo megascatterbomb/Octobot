@@ -3,6 +3,7 @@ import { Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachment, Messag
 import * as fs from "fs";
 import path from "path";
 import { addBalance, octobuckBalance } from "../database/octobuckBalance";
+import { logRandomDropClaim } from "../utilities/log";
 
 const counterStart = 1000; // Higher number = more rare
 let counter = counterStart;
@@ -49,20 +50,21 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         let claimed = false;
         const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
         
-        reactionCollector.on("collect", (reaction, user) => {
+        reactionCollector.on("collect", async (reaction, user) => {
             if(!claimed) {
                 claimed = true;
                 counter = Math.max(counterStart, Math.floor(counter/1.1));
                 octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
-                addBalance(user, valueToSend);
+                await addBalance(user, valueToSend);
+                await logRandomDropClaim(user, valueToSend);
             }
         });
 
-        reactionCollector.on("end", collected => {
+        reactionCollector.on("end", async collected => {
             if(!claimed && collected.size === 0) {
                 const ruinedGifPath = path.resolve(__dirname,"../assets/octobucks/octobucks_ruined.gif");
-                octobuckMessage.channel.send({content: "Nobody claimed the Octobucks in time. What a shame!", files: [ruinedGifPath]});
-                octobuckMessage.delete();
+                await octobuckMessage.channel.send({content: "Nobody claimed the Octobucks in time. What a shame!", files: [ruinedGifPath]});
+                await octobuckMessage.delete();
             }
         });
     },

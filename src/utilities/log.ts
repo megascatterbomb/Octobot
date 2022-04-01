@@ -19,6 +19,12 @@ export async function logShopTransaction(customer: User, shopItemIndex: number, 
             " bought " + Array.from(shopItems.values())[shopItemIndex-1].name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
 }
 
+export async function logRandomDropClaim(user: User, amountFound: number): Promise<void> {
+    const messageContent: string ="Found Octobuck: <@" + user.id + "> found $" + amountFound;
+
+    getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
+}
+
 export async function logBalanceChange(user: User, amount: number, oldBalance?: number | undefined, newBalance?: number | undefined): Promise<void> {
     const detailed: boolean = oldBalance !== undefined && newBalance !== undefined && amount === newBalance - oldBalance;
     const amountString: string = amount < 0 ? "-$" + Math.abs(amount) : "$" + Math.abs(amount);
