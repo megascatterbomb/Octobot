@@ -37,7 +37,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
             return;
         }        
         const valueToSend: number = getOctobuckValue();
-        const gifPath = path.resolve(__dirname,"../assets/octobucks/octobucks_" + valueToSend + ".gif");
+        const gifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_" + valueToSend + ".gif");
 
         const octobuckEmoji: GuildEmoji = guild.emojis.cache.find(emoji => emoji.name === reactionEmoji) as GuildEmoji; // Octocoin emoji
         const octobuckMessage: Message = await message.channel.send({content: "First person to click on the reaction gets the Octobucks!", files: [gifPath]});
@@ -63,7 +63,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
 
         reactionCollector.on("end", async collected => {
             if(!claimed && collected.size === 0) {
-                const ruinedGifPath = path.resolve(__dirname,"../assets/octobucks/octobucks_ruined.gif");
+                const ruinedGifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_ruined.gif");
                 await octobuckMessage.channel.send({content: "Nobody claimed the Octobucks in time. What a shame!", files: [ruinedGifPath]});
                 await octobuckMessage.delete();
             }
