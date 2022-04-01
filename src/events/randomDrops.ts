@@ -72,6 +72,10 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
     firesOn: "messageCreate",
 };
 
+export function getCounterValue(): number {
+    return counter;
+}
+
 function getOctobuckValue(): number {
     const randomValue: number = Math.random() * 100;
     let threshold = 0;
