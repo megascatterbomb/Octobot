@@ -10,6 +10,6 @@ export default abstract class ChannelCommand extends Command {
         if(allowedChannels.includes(message.channelId) || message.member?.permissions.has("ADMINISTRATOR")) {
             return {shouldBlock: false};
         }
-        return {shouldBlock: true, msg: "You cannot use Octobot in this channel"};
+        return {shouldBlock: true, msg: "You cannot use Octobot in this channel. Use <#957061767920513164> instead"};
     }
 }

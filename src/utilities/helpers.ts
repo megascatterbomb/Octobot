@@ -23,5 +23,6 @@ export async function getDiscordName(user: User, message: Message, client: Clien
 }
 
 export async function getDiscordNameFromID(user: string, client: Client, guild?: Guild | null): Promise<string> {
-    return guild?.members.cache.get(user)?.displayName ?? client.users.cache.get(user)?.username ?? "<could not get name>";
+    const userObject: User | undefined = client.users.cache.get(user);
+    return guild?.members.cache.get(user)?.displayName ?? userObject instanceof User ? userObject?.username + "#" + userObject?.discriminator : "<could not get name>";
 }

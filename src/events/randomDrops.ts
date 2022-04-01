@@ -54,10 +54,10 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         reactionCollector.on("collect", async (reaction, user) => {
             if(!claimed) {
                 claimed = true;
-                counter = Math.max(counterStart, Math.floor(counter/1.1));
                 octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
                 await addBalance(user, valueToSend);
-                await logRandomDropClaim(user, valueToSend);
+                await logRandomDropClaim(user, valueToSend, counter);
+                counter = Math.max(counterStart, Math.floor(counter/1.1));
             }
         });
 
