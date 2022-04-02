@@ -26,8 +26,8 @@ export default class StatsCommand extends ChannelCommand {
         const totalOctobucks = balances.reduce((accumulator, object) => {
             return accumulator + object.balance;
         }, 0);
-        const rateOctoToUSD = totalOctobucks/totalUSDInvested;
-        const rateUSDToOcto = totalUSDInvested/totalOctobucks;
+        const rateUSDToOcto = totalOctobucks/totalUSDInvested;
+        const rateOctoToUSD = totalUSDInvested/totalOctobucks;
 
         message.channel.send("```\nTotal Octobucks: $" + totalOctobucks + "\nTotal USD Invested: $" + 
             totalUSDInvested + "\n1 USD = " + rateUSDToOcto.toPrecision(5) + " Octobucks\n1 Octobuck = " + rateOctoToUSD.toPrecision(5) + " USD```");
