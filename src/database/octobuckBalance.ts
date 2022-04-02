@@ -165,6 +165,10 @@ export async function getAllBalances(page: number): Promise<Balance[]> {
 
     const pageLimit = 20;
 
+    if(page === -1) {
+        return await octobuckBalance.aggregate([{$sort: {balance: -1, _id: 1}}, {$match: {balance: {$gt: 0}}}]);
+    }
+
     const balances: Balance[] = await octobuckBalance.aggregate([{$sort: {balance: -1, _id: 1}}, {$skip: (page-1) * pageLimit}, {$limit: pageLimit}, {$match: {balance: {$gt: 0}}}]);
     if(balances.length === 0) {
         throw new Error("This page does not exist. Max pages: " + (Math.ceil((await octobuckBalance.count({balance: {$gt: 0}})/pageLimit))));

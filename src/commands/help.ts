@@ -44,6 +44,9 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$help,  $?  -  Args: `none`",
         value: "Display this help menu."
     },{
+        name: "$leaderboard,  $rich  -  Args: `Page (number)`",
+        value: "View the richest players on the server."
+    },{
         name: "$ping,  $hello,  $test  -  Args: `none`",
         value: "Check if Octobot is alive and well."
     },{
@@ -53,11 +56,11 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$shop  -  Args: `none`",
         value: "View items available for purchase, including any special discounts you're eligible for."
     },{
+        name: "$stats  -  Args: `none`",
+        value: "View statistics about the economy."
+    },{
         name: "$uptime  -  Args: `none`",
         value: "Check how long the bot has been up for."
-    },{
-        name: "$leaderboard,  $rich  -  Args: `Page (number)`",
-        value: "View the richest players on the server."
     },
     ];
 
