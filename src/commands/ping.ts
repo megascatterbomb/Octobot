@@ -21,6 +21,6 @@ export default class PingCommand extends ChannelCommand {
 
     async execute(message: Message, client: Client) {
         console.log("Ping received from " + message.author.username + " " + message.author.id); 
-        message.channel.send("Pong!");
+        message.reply("Pong!");
     }
 }

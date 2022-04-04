@@ -25,6 +25,12 @@ export async function logRandomDropClaim(user: User, amountFound: number, counte
     getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
 }
 
+export async function logLotteryDraw(user: User, amount: number) {
+    const messageContent: string ="Lottery Draw: `" + await getDiscordNameFromID(user.id, client) + "` won $" + amount;
+
+    getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
+}
+
 export async function logBalanceChange(user: User, amount: number, oldBalance?: number | undefined, newBalance?: number | undefined): Promise<void> {
     const detailed: boolean = oldBalance !== undefined && newBalance !== undefined && amount === newBalance - oldBalance;
     const amountString: string = amount < 0 ? "-$" + Math.abs(amount) : "$" + Math.abs(amount);

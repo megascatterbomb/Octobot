@@ -20,6 +20,6 @@ import ChannelCommand from "../extensions/channelCommand";
 export default class UptimeCommand extends ChannelCommand {
 
     async execute(message: Message, client: Client) {
-        message.channel.send("Uptime: " + (process.uptime()/3600).toFixed(2) + " hours");
+        message.reply("Uptime: " + (process.uptime()/3600).toFixed(2) + " hours");
     }
 }

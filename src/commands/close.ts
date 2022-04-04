@@ -18,6 +18,6 @@ export default class CloseCommand extends Command {
     async execute(message: Message, client: Client) {
         console.log("Shop Closed"); 
         setShopOpen(false);
-        message.channel.send("Shop has been closed");
+        message.reply("Shop has been closed");
     }
 }

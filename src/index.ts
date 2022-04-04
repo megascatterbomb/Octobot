@@ -3,6 +3,7 @@ import { Intents } from "discord.js";
 import connectToDatabase from "./database/mongo";
 import path from "path";
 import { scheduleLoop } from "./database/schedule";
+import { lotteryLoop } from "./database/lottery";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 
@@ -19,4 +20,5 @@ export let client: Client;
     await client.login(key);
     console.log("Connected to Discord");
     scheduleLoop();
+    lotteryLoop();
 })();

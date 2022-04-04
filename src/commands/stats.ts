@@ -29,7 +29,7 @@ export default class StatsCommand extends ChannelCommand {
         const rateUSDToOcto = totalOctobucks/totalUSDInvested;
         const rateOctoToUSD = totalUSDInvested/totalOctobucks;
 
-        message.channel.send("```\nTotal Octobucks: $" + totalOctobucks + "\nTotal USD Invested: $" + 
+        message.reply("```\nTotal Octobucks: $" + totalOctobucks + "\nTotal USD Invested: $" + 
             totalUSDInvested + "\n1 USD = " + rateUSDToOcto.toPrecision(5) + " Octobucks\n1 Octobuck = " + rateOctoToUSD.toPrecision(5) + " USD```");
     }
 }

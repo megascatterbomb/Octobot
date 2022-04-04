@@ -33,6 +33,6 @@ export default class SendCommand extends ChannelCommand {
         if(err !== "") {
             throw new Error(err);
         }
-        await message.channel.send("Sucessfully sent $" + this.amount + " to " + displayName);
+        await message.reply("Sucessfully sent $" + this.amount + " to " + displayName);
     }
 }

@@ -36,6 +36,6 @@ export default class BalanceCommand extends ChannelCommand {
             throw new Error("Could not find the balance of that user (they are not in the server)");
         }
 
-        message.channel.send("Balance of " + displayName + ": $" + balance);
+        message.reply("Balance of " + displayName + ": $" + balance);
     }
 }

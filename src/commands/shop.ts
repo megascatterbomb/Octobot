@@ -30,7 +30,7 @@ export default class ShopCommand extends ChannelCommand {
             return;
         }
         const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild);
-        message.channel.send({embeds: [embed]});
+        message.reply({embeds: [embed]});
     }
 }
 

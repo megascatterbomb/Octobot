@@ -29,7 +29,7 @@ export default class BuyCommand extends ChannelCommand {
 
     async execute(message: Message, client: Client) {
         if(!shopOpen) {
-            message.channel.send("Sorry, the shop is closed. Come back later.");
+            message.reply("Sorry, the shop is closed. Come back later.");
             return;
         }
         const target = this.target ?? null; 
@@ -48,7 +48,7 @@ export default class BuyCommand extends ChannelCommand {
         }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
-            message.channel.send({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}); 
+            message.reply({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}); 
         } else if(currentBalance >= discountPrice) {
             const err: string = await shopItem.effect(message, target);
             if(err === "") {

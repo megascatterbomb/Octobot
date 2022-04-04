@@ -21,7 +21,7 @@ import { shopItems } from "../utilities/shop";
 export default class HelpCommand extends ChannelCommand {
 
     async execute(message: Message, client: Client) {
-        message.channel.send({embeds: [await generateRichEmbed(client)]});
+        message.reply({embeds: [await generateRichEmbed(client)]});
     }
 }
 

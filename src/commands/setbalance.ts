@@ -33,6 +33,6 @@ export default class SetBalanceCommand extends Command {
         if(err !== "") {
             throw new Error(err);
         }
-        message.channel.send("Sucessfully set balance of " + displayName + " to $" + this.amount);
+        message.reply("Sucessfully set balance of " + displayName + " to $" + this.amount);
     }
 }

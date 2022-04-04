@@ -2,11 +2,30 @@
 
 import { Collection, Message, User, Permissions, GuildMember, Guild } from "discord.js";
 import { client } from "..";
+import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
 import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, ShopItem, basementDwellerRole, offTopicImageRole } from "./types";
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
+    ["lotteryTicket", {name: "Lottery Ticket", basePrice: 5, roleDiscounts:
+        [ {role: SpecialRole.memeMachine, dPrice: 4} ],
+    effect: async (message: Message): Promise<string> => {
+        if(await getTicket(message.author) !== undefined) {
+            return "You already purchased a lottery ticket. Next draw is in " + ((((await getLotteryDrawTime()).getTime() - Date.now())/3600000).toPrecision(3) + " hours");
+        }
+        await addTicket(message.author);
+        message.reply("You have purchased a lottery ticket. Next draw is in " + ((((await getLotteryDrawTime()).getTime() - Date.now())/3600000).toPrecision(3) + " hours"));
+        return "";
+        
+    }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
+        return "This shopItem doesn't implement any scheduled events.";
+    },
+    requiresTarget: false, 
+    description: "- Gives you permission to change your nickname for 5 minutes.\n- Once that time's up you're stuck with whatever you chose!"
+    }],
+
+
     ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}], 
     effect: async (message: Message): Promise<string> => {
@@ -60,7 +79,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             const endDate = new Date(Date.now() + 15*60000); // 15 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
             await createScheduledEvent("muteShort", targetMember.user.id, targetMember.guild.id, endDate);
-            await message.channel.send("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
+            await message.reply("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
             let member;
@@ -89,7 +108,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You already have the keys to the basement. Check your pockets again.";
         }
         await message.member?.roles.add(basementDwellerRole);
-        await message.channel.send("You have been given the keys to the basement. Don't lose them!");
+        await message.reply("You have been given the keys to the basement. Don't lose them!");
         return "";
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         return "This shopItem doesn't implement any scheduled events.";
@@ -118,7 +137,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             const endDate = new Date(Date.now() + 30*60000); // 30 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
             await createScheduledEvent("muteMedium", targetMember.user.id, targetMember.guild.id, endDate);
-            await message.channel.send("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
+            await message.reply("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
             let member;
@@ -147,7 +166,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "You already have permission to post images in #general-off-topic";
         }
         await message.member?.roles.add(offTopicImageRole);
-        await message.channel.send("You can now post images in <#818595825143382076>. Please don't turn it into <#789106617407766548> 2.0 thanks.");
+        await message.reply("You can now post images in <#818595825143382076>. Please don't turn it into <#789106617407766548> 2.0 thanks.");
         return "";
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         return "This shopItem doesn't implement any scheduled events.";
@@ -176,7 +195,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             const endDate = new Date(Date.now() + 60*60000); // 60 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
             await createScheduledEvent("muteLong", targetMember.user.id, targetMember.guild.id, endDate);
-            await message.channel.send("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
+            await message.reply("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
             let member;

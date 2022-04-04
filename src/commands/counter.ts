@@ -20,6 +20,6 @@ import { getCounterValue } from "../events/randomDrops";
 export default class CounterCommand extends Command {
 
     async execute(message: Message, client: Client) {
-        message.channel.send("" + getCounterValue());
+        message.reply("" + getCounterValue());
     }
 }

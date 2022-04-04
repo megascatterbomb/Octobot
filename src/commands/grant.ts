@@ -38,6 +38,6 @@ export default class GrantCommand extends Command {
             throw new Error(err);
         }
         logUserTransaction(null, this.user, this.amount);
-        message.channel.send("Sucessfully bestowed $" + this.amount + " to " + displayName);
+        message.reply("Sucessfully bestowed $" + this.amount + " to " + displayName);
     }
 }

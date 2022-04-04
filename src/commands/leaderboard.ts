@@ -27,7 +27,7 @@ export default class LeaderboardCommand extends ChannelCommand {
             throw new Error("You must specify a page number greater than or equal to 1.");
         }
         const embed: MessageEmbed = await generateRichEmbed(await getAllBalances(this.page), this.page, message);
-        message.channel.send({embeds: [embed]});
+        message.reply({embeds: [embed]});
     }
 }
 
