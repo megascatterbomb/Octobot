@@ -22,7 +22,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "This shopItem doesn't implement any scheduled events.";
     },
     requiresTarget: false, 
-    description: "- Gives you permission to change your nickname for 5 minutes.\n- Once that time's up you're stuck with whatever you chose!"
+    description: "- Gives you a chance at winning a prize of Octobucks.\n- The prize increases as more tickets are purchased.\n- Lottery is drawn daily at midnight UTC.\n - Type `$lottery` to check the lottery status."
     }],
 
 

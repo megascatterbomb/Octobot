@@ -47,6 +47,9 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$leaderboard,  $rich  -  Args: `Page (number)`",
         value: "View the richest players on the server."
     },{
+        name: "$lottery,  $lot  -  Args: `none`",
+        value: "View information about the lottery, including the time of the next draw."
+    },{
         name: "$ping,  $hello,  $test  -  Args: `none`",
         value: "Check if Octobot is alive and well."
     },{

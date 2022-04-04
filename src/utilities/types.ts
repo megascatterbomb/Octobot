@@ -15,10 +15,11 @@ export const cringeMuteRole = "814895755886198814"; // Managed by Dyno, do not a
 export const offTopicImageRole = "956369590294818826";
 export const basementDwellerRole = "956369181589258280";
 
+// The first channel in this is treated as the main channel for commands.
 export const allowedChannels: string[] = [
+    "957061767920513164", // Octobot commands
     "574157660488859670", // Beta testing channel
-    "814881168263872532", // Gamer Police bot-commands
-    "957061767920513164" // Octobot commands
+    "814881168263872532" // Gamer Police bot-commands
 ];
 
 export const logChannel = "947220771913228288";

@@ -1,10 +1,10 @@
-import { Guild, Message, User } from "discord.js";
+import { Guild, Message, TextChannel, User } from "discord.js";
 import { unwatchFile } from "fs";
 import { model, Schema, Model, Types} from "mongoose";
 import { client } from "..";
 import { logLotteryDraw } from "../utilities/log";
 import { shopItems } from "../utilities/shop";
-import { ShopItem } from "../utilities/types";
+import { allowedChannels, ShopItem } from "../utilities/types";
 import { addBalance } from "./octobuckBalance";
 
 // Scheduled Event Schema
@@ -55,6 +55,14 @@ export async function getTicket(user: User): Promise<LotteryTicket | undefined> 
     return await lotteryTicket.findOne({user: user.id}).lean() ?? undefined;
 }
 
+export async function getLotteryPlayerCount(): Promise<number> {
+    return await lotteryTicket.count();
+}
+
+export async function getLotteryJackpot(): Promise<number> {
+    return (await lottery.findOne({}).lean())?.jackpot ?? 0;
+}
+
 export async function getLotteryDrawTime(): Promise<Date> {
     return (await getCurrentLottery()).date;
 }
@@ -82,7 +90,8 @@ async function getCurrentLottery(): Promise<Lottery> {
 async function drawLottery() {
     const tickets: LotteryTicket[] = await lotteryTicket.find({});
     if(tickets.length === 0) {
-        console.log("Lottery Draw: Nobody participated");
+        console.log("Lottery Draw: Nobody participated.");
+        (client.channels.cache.get(allowedChannels[0]) as TextChannel).send("Lottery Draw: Nobody participated.");
         return;
     }
     const winningTicket = tickets[Math.floor(Math.random() * tickets.length)];
@@ -93,6 +102,7 @@ async function drawLottery() {
     if(result !== "") {
         throw new Error(result);
     }
+    (client.channels.cache.get(allowedChannels[0]) as TextChannel).send("<@" + winnerObject.id + "> won " + jackpot + " Octobucks in today's lottery!");
     console.log("Lottery Draw: " + winnerObject.username + " won $" + jackpot);
     await logLotteryDraw(winnerObject, jackpot);
 }
