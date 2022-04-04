@@ -2,7 +2,7 @@ import { Client, DiscordEvent } from "@frasermcc/overcord";
 import { Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachment, MessageFlags, ReactionCollector, ReactionEmoji, ReactionManager, ReactionUserManager, TextChannel, ThreadChannel, User } from "discord.js";
 import * as fs from "fs";
 import path from "path";
-import { addBalance, octobuckBalance } from "../database/octobuckBalance";
+import { addBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
 import { logRandomDropClaim } from "../utilities/log";
 
 const counterStart = 980; // Should be equal or under counterThreshold
@@ -59,9 +59,16 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         reactionCollector.on("collect", async (reaction, user) => {
             if(!claimed) {
                 claimed = true;
-                octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
-                await addBalance(user, valueToSend);
-                await logRandomDropClaim(user, valueToSend, counter);
+                // Anti fraud measures
+                if(message.channel instanceof ThreadChannel) {
+                    await subtractBalance(user, valueToSend, true);
+                    octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks! Or did they?");
+                    await logRandomDropClaim(user, valueToSend, counter - counterStart, true);
+                } else {
+                    await addBalance(user, valueToSend);
+                    octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
+                    await logRandomDropClaim(user, valueToSend, counter - counterStart, false);
+                }
                 counter = Math.max(counterStart, Math.floor(counter/1.1));
             }
         });

@@ -89,7 +89,7 @@ export async function addBalance(user: User, amount: number): Promise<string> {
     return "";
 }
 
-export async function subtractBalance(user: User, amount: number): Promise<boolean> {
+export async function subtractBalance(user: User, amount: number, clampBalance = true): Promise<boolean> {
     if(amount < 0) {
         return false;
     }
@@ -98,7 +98,8 @@ export async function subtractBalance(user: User, amount: number): Promise<boole
     oldBalance = await getUserBalance(user) ?? -1;
 
     oldBalance = Math.max(oldBalance, 0);
-    const newBalance = oldBalance - amount;
+    // Clamp balance prevents an error of negative octobucks if and only if its true.
+    const newBalance = Math.max(oldBalance - amount, clampBalance ? 0 : -100);
 
     if(oldBalance === -1 || newBalance < 0) {
         return false;

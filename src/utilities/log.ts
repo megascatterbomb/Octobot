@@ -19,8 +19,9 @@ export async function logShopTransaction(customer: User, shopItemIndex: number, 
             " bought " + Array.from(shopItems.values())[shopItemIndex-1].name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
 }
 
-export async function logRandomDropClaim(user: User, amountFound: number, counter: number): Promise<void> {
-    const messageContent: string ="Found Octobuck: `" + await getDiscordNameFromID(user.id, client) + "` found $" + amountFound + " (Counter: " + counter + ")";
+export async function logRandomDropClaim(user: User, amountFound: number, counter: number, antiFraud: boolean): Promise<void> {
+    const messageContent: string ="Found Octobuck: `" + await getDiscordNameFromID(user.id, client) + "` found $" + amountFound + " (Message Count: " + counter 
+        + (antiFraud ? ", Anti Fraud measures kicked in, subtracted Octobucks)" : ")");
 
     getLoggingChannel().send({content: messageContent, allowedMentions: {roles: [], users: []}});
 }
