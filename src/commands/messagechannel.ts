@@ -22,9 +22,9 @@ import { getDiscordName } from "../utilities/helpers";
 @Alias("messagechannel", "msgchannel", "msgc")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Permit("ADMINISTRATOR")
-@Described("Set the balance of a user")
+@Described("Send a message as Octobot in a channel.")
 export default class MessageChannelCommand extends Command {
-    @Argument({ type: new ChannelType(), description: "The user to message in DMs"})
+    @Argument({ type: new ChannelType(), description: "The channel to message"})
         channel!: Channel;
 
     @Argument({ type: new StringType(), description: "Message to send", infinite: true})

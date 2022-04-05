@@ -22,7 +22,7 @@ import { getDiscordName } from "../utilities/helpers";
 @Alias("messageuser", "msguser", "msgu")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Permit("ADMINISTRATOR")
-@Described("Set the balance of a user")
+@Described("Message a user as Octobot in DMs")
 export default class MessageUserCommand extends Command {
     @Argument({ type: new UserType(), description: "The user to message in DMs"})
         user!: User;
