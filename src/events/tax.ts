@@ -11,8 +11,8 @@ import { allowedChannels, logChannel } from "../utilities/types";
 type Tax = {user: string, tax: number, newBalance: number};
 
 const taxBrackets: {thresMult: number, percent: number}[] = 
-    [{thresMult: 1, percent: 1}, {thresMult: 2, percent: 2}, {thresMult: 3, percent: 4}, {thresMult: 4, percent: 6},
-        {thresMult: 6, percent: 8}, {thresMult: 8, percent: 10}, {thresMult: 10, percent: 12}, {thresMult: 12, percent: 15}];
+    [{thresMult: 1, percent: 1}, {thresMult: 2, percent: 2}, {thresMult: 3, percent: 3}, {thresMult: 4, percent: 4},
+        {thresMult: 5, percent: 5}, {thresMult: 10, percent: 10}, {thresMult: 15, percent: 12.5}, {thresMult: 20, percent: 15}];
 
 function calculateTax(balance: number, taxThreshold: number): number {
     let subtract = 0;
