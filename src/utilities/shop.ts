@@ -91,7 +91,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             // If the role was removed manually then we don't need to do anything nor do we need to throw an error
             if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
                 await member?.roles.remove(funnyMuteRole);
-                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.").catch();
             }
             return "";
         },
@@ -149,7 +149,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             // If the role was removed manually then we don't need to do anything nor do we need to throw an error
             if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
                 await member?.roles.remove(funnyMuteRole);
-                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.").catch();
             }
             return "";
         },
@@ -207,7 +207,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             // If the role was removed manually then we don't need to do anything nor do we need to throw an error
             if(member?.roles.cache.get(funnyMuteRole) !== undefined) {
                 await member?.roles.remove(funnyMuteRole);
-                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.");
+                await member.send("Your mute that a paying customer imposed on you in the Octo GAMING Discord server has expired.").catch();
             }
             return "";
         },
