@@ -5,8 +5,8 @@ import path from "path";
 import { addBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
 import { logRandomDropClaim } from "../utilities/log";
 
-const counterStart = 980; // Should be equal or under counterThreshold
-const counterThreshold = 1000; // RNG has to exceed this threshold to trigger
+const counterStart = 1975; // Should be equal or under counterThreshold
+const counterThreshold = 2000; // RNG has to exceed this threshold to trigger
 let counter = counterStart;
 
 const reactionEmoji = "Octocoin";
@@ -69,7 +69,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
                     octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
                     await logRandomDropClaim(user, valueToSend, counter - counterStart, false);
                 }
-                counter = Math.max(counterStart, Math.floor(counter/1.1));
+                counter = counterStart;
             }
         });
 

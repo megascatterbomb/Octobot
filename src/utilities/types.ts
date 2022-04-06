@@ -17,7 +17,7 @@ export const basementDwellerRole = "956369181589258280";
 
 // The first channel in this is treated as the main channel for commands.
 export const allowedChannels: string[] = [
-    "957061767920513164", // Octobot commands
+    "574157660488859670", // Octobot commands
     "574157660488859670", // Beta testing channel
     "814881168263872532" // Gamer Police bot-commands
 ];

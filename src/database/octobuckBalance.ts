@@ -3,6 +3,7 @@ import { UV_FS_O_FILEMAP } from "constants";
 import { User } from "discord.js";
 import mongoose from "mongoose";
 import assert from "node:assert";
+import { resolve } from "path/posix";
 import { logUserTransaction, logBalanceChange, logBalanceSet } from "../utilities/log";
 const Schema = mongoose.Schema;
 
@@ -135,6 +136,14 @@ export async function setBalance(user: User, amount: number): Promise<string> {
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
     await logBalanceSet(user, newBalance, oldBalance);
     return "";
+}
+
+export async function massUpdateBalances(newBalances: Balance[]) {
+    for(let i = 0; i < newBalances.length; i++) {
+        const b = newBalances[i];
+        await octobuckBalance.findOneAndUpdate({user: b.user}, {balance: b.balance});
+    }
+    return;
 }
 
 export async function transferFunds(sender: User, recipient: User, amount: number): Promise<string> {
