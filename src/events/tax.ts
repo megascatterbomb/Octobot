@@ -102,7 +102,9 @@ export async function taxLoop() {
         while(true) {
             await delay();
             const taxes = await fileTaxes();
-            (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [await generateTaxReport(taxes)]});
+            const embed = await generateTaxReport(taxes);
+            (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [embed]});
+            (client.channels.cache.get(allowedChannels[0]) as TextChannel)?.send({embeds: [embed]});
         }
     } catch (err) {
         console.log("Tax Broke: " + err);
