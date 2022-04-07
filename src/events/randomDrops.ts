@@ -11,26 +11,16 @@ let counter = counterStart;
 
 const reactionEmoji = "Octocoin";
 
-// Order least probable to most probable.
-const probs: {prob: number, val: number}[] = [
-    {prob: 1, val: 100},
-    {prob: 1.5, val: 50},
-    {prob: 2.5, val: 30},
-    {prob: 3, val: 28},
-    {prob: 4, val: 20},
-    {prob: 8, val: 12},
-    {prob: 12, val: 7},
-    {prob: 14, val: 6},
-    {prob: 22, val: 5},
-    {prob: 32, val: 3}
-];
+const probs: number[] = [3, 5, 6, 7, 12, 20, 28, 30, 50, 100];
 
 const blockedChannels: string[] = ["828771529469853766", "887720173136658507", "789098821875531789"]; // Secret links, secret artist channel, spam chat
 const blockedCategories: string[] = ["789109056756776971", "789098821875531788"]; // Super secret, Important stuff
+let blockedUsers: string[] = []; // Dynamically pushed to whenever a drop occurs. Not persisted in DB since this isnt critical.
 
 const RandomDropEvent: DiscordEvent<"messageCreate"> = {
     callback: async (message) => {
-        if(message.author.bot || blockedChannels.includes(message.channel.id) || blockedCategories.includes((message.channel as TextChannel | ThreadChannel)?.parent?.id ?? "")) {
+        if(message.author.bot || blockedUsers.includes(message.author.id) || blockedChannels.includes(message.channel.id) || 
+            blockedCategories.includes((message.channel as TextChannel | ThreadChannel)?.parent?.id ?? "")) {
             return;
         }
 
@@ -66,6 +56,8 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
                     await logRandomDropClaim(user, valueToSend, counter - counterStart, true);
                 } else {
                     await addBalance(user, valueToSend);
+                    blockedUsers.push(user.id); // Block user from causing drop rate to increase (prevents single-user farming)
+                    setTimeout(() => blockedUsers = blockedUsers.filter(u => u !== user.id), 1800000); // Unblock user after 30 minutes
                     octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
                     await logRandomDropClaim(user, valueToSend, counter - counterStart, false);
                 }
@@ -89,15 +81,18 @@ export function getCounterValue(): number {
 }
 
 function getOctobuckValue(): number {
-    const randomValue: number = Math.random() * 100;
+    // Reciprocals used to give high-value Octobucks the lowest probability.
+    const sortedProbs = probs.sort((a, b) => b - a);
+    const randomValue: number = Math.random() * sortedProbs.reduce((acc, curr) => acc + (1/curr), 0);
     let threshold = 0;
-    for(let i = 0; i < probs.length; i++) {
-        threshold += probs[i].prob;
+    for(let i = 0; i < sortedProbs.length; i++) {
+        threshold += 1/sortedProbs[i];
         if(randomValue < threshold) {
-            return probs[i].val;
+            return sortedProbs[i];
         }
     }
-    return probs[-1].val;
+    // If for some reason the loop doesnt resolve, get the lowest value Octobuck.
+    return sortedProbs[-1];
 }
 
 export default RandomDropEvent;
