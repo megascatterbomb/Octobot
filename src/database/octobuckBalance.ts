@@ -12,11 +12,13 @@ const Schema = mongoose.Schema;
 export interface Balance {
     user: string,
     balance: number
+    taxDeductible: number
 }
 
 const octobuckBalanceSchema = new Schema({
     user: {type: String, required: true, _id: true},
-    balance: {type: Number, required: true}
+    balance: {type: Number, required: true},
+    taxDeductible: {type: Number, required: true}
 }, {
     timestamps: {},
     collection: "OctobuckBalance"
@@ -36,9 +38,10 @@ export async function registerBalance(user: User, initialBalance = 0): Promise<s
         return "Failed to register balance: cannot specify negative initial balance";
     }
 
-    const newBalance = {
+    const newBalance: Balance = {
         user: user.id,
-        balance: initialBalance ?? 0
+        balance: initialBalance ?? 0,
+        taxDeductible: 0
     };
     
     // QUERY: Is this needed?
@@ -51,13 +54,17 @@ export async function registerBalance(user: User, initialBalance = 0): Promise<s
     return "";
 }
 
-export async function getUserBalance(user: User): Promise<number | null> {
+export async function getUserBalanceObject(user: User): Promise<Balance | null> {
     try {
         const balance: Balance | null = await octobuckBalance.findOne({user: user.id});
-        return balance?.balance ?? null;
+        return balance ?? null;
     } catch {
         return null;
     }
+}
+
+export async function getUserBalance(user: User): Promise<number | null> {
+    return (await getUserBalanceObject(user))?.balance ?? null;
 }
 
 // Returns true if successful
@@ -67,22 +74,23 @@ export async function addBalance(user: User, amount: number): Promise<string> {
         return "Cannot grant a negative amount of Octobucks";
     }
 
-    let oldBalance: number;
-    oldBalance = await getUserBalance(user) ?? -1;
+    const oldBalanceObject: Balance | null = await getUserBalanceObject(user) ?? null;
 
     // Try to register user, if return error that means that user isnt in the server.
-    if(oldBalance === -1) {
+    if(oldBalanceObject === null) {
         const result: string = await registerBalance(user, 0);
         if(result !== "") {
             return result;
         }
     }
+    let oldBalance = oldBalanceObject?.balance ?? -1;
     oldBalance = Math.max(oldBalance, 0);
     const newBalance = oldBalance + amount;
 
     const balance: Balance = {
         user: user.id,
-        balance: newBalance
+        balance: newBalance,
+        taxDeductible: oldBalanceObject?.taxDeductible ?? 0
     };
 
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
@@ -90,49 +98,92 @@ export async function addBalance(user: User, amount: number): Promise<string> {
     return "";
 }
 
-export async function subtractBalance(user: User, amount: number, clampBalance = true): Promise<boolean> {
-    if(amount < 0) {
-        return false;
+export async function addTaxDeduction(user: User, amount: number): Promise<string> {
+
+    const oldBalanceObject: Balance | null = await getUserBalanceObject(user) ?? null;
+
+    // Try to register user, if return error that means that user isnt in the server.
+    if(oldBalanceObject === null) {
+        return "Error when adding tax deduction: Could not find balance of user";
     }
 
-    let oldBalance: number;
-    oldBalance = await getUserBalance(user) ?? -1;
+    const balance: Balance = {
+        user: user.id,
+        balance: oldBalanceObject?.balance,
+        taxDeductible: (oldBalanceObject?.taxDeductible ?? 0) + amount
+    };
 
+    (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
+    return "";
+}
+
+export async function subtractTaxDeduction(user: User, amount: number): Promise<string> {
+
+    const oldBalanceObject: Balance | null = await getUserBalanceObject(user) ?? null;
+
+    // Try to register user, if return error that means that user isnt in the server.
+    if(oldBalanceObject === null) {
+        return "Error when adding tax deduction: Could not find balance of user";
+    }
+
+    const balance: Balance = {
+        user: user.id,
+        balance: oldBalanceObject?.balance,
+        taxDeductible: Math.max((oldBalanceObject?.taxDeductible ?? 0) - amount, 0)
+    };
+
+    (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
+    return "";
+}
+
+export async function subtractBalance(user: User, amount: number, clampBalance = true): Promise<string> {
+    if(amount < 0) {
+        return "Cannot subtract a negative amount of Octobucks";
+    }
+
+    const oldBalanceObject: Balance | null = await getUserBalanceObject(user) ?? null;
+
+    let oldBalance = oldBalanceObject?.balance ?? -1;
     oldBalance = Math.max(oldBalance, 0);
     // Clamp balance prevents an error of negative octobucks if and only if its true.
     const newBalance = Math.max(oldBalance - amount, clampBalance ? 0 : -100);
-
-    if(oldBalance === -1 || newBalance < 0) {
-        return false;
+    
+    if(oldBalance === -1) {
+        return "Cannot find this user's balance. They are not part of the system.";
+    } else if (newBalance < 0) {
+        return "Cannot set this user's balance below zero.";
     }
 
-    const balance = {
+    const balance: Balance = {
         user: user.id,
-        balance: newBalance
+        balance: newBalance,
+        taxDeductible: oldBalanceObject?.taxDeductible ?? 0
     };
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
     await logBalanceChange(user, -amount, oldBalance, newBalance);
-    return true;
+    return "";
 }
 
 export async function setBalance(user: User, amount: number): Promise<string> {
-
     if(amount < 0) {
         return "Cannot set a balance below 0";
     }
 
-    const oldBalance: number = await getUserBalance(user) ?? -1;
-    if(oldBalance === -1 && await registerBalance(user, 0) === undefined) {
+    const oldBalanceObject: Balance | null = await getUserBalanceObject(user) ?? null;
+    
+    if(oldBalanceObject === null && await registerBalance(user, 0) === undefined) {
         return "Cannot find this user in the server";
     }
     const newBalance = amount;
 
     const balance: Balance = {
         user: user.id,
-        balance: newBalance
+        balance: newBalance,
+        taxDeductible: oldBalanceObject?.taxDeductible ?? 0
     };
 
+    const oldBalance: number = oldBalanceObject?.balance ?? -1;
     (await octobuckBalance.findOneAndUpdate({user: user.id}, balance))?.save();
     await logBalanceSet(user, newBalance, oldBalance);
     return "";
@@ -141,7 +192,8 @@ export async function setBalance(user: User, amount: number): Promise<string> {
 export async function massUpdateBalances(newBalances: Balance[]) {
     for(let i = 0; i < newBalances.length; i++) {
         const b = newBalances[i];
-        await octobuckBalance.findOneAndUpdate({user: b.user}, {balance: b.balance});
+        console.log(b);
+        await octobuckBalance.findOneAndUpdate({user: b.user}, {$set: {balance: b.balance, taxDeductible: b.taxDeductible}});
     }
     return;
 }

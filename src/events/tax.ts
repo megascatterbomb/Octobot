@@ -14,8 +14,12 @@ const taxBrackets: {thresMult: number, percent: number}[] =
     [{thresMult: 1, percent: 1}, {thresMult: 2, percent: 2}, {thresMult: 3, percent: 3}, {thresMult: 4, percent: 4},
         {thresMult: 5, percent: 5}, {thresMult: 10, percent: 10}, {thresMult: 15, percent: 12.5}, {thresMult: 20, percent: 15}];
 
-function calculateTax(balance: number, taxThreshold: number): number {
+export async function calculateTax(balance: number, taxThreshold?: number): Promise<number> {
     let subtract = 0;
+
+    if(taxThreshold === undefined) {
+        taxThreshold = await getTaxThreshold();
+    }
 
     for(let i = 0; i < taxBrackets.length; i++) {
         if(balance > taxThreshold * taxBrackets[i].thresMult) {
@@ -37,27 +41,42 @@ function calculateTax(balance: number, taxThreshold: number): number {
     return Math.ceil(subtract);
 }
 
+async function getTaxThreshold(balances?: Balance[]) {
+    if(balances === undefined) {
+        balances = await getAllBalances(-1);
+    }
+    const octoUser: User = client.users.cache.get("167925663485919232") as User;
+    const averageBalance = balances.reduce((acc, curr) => {
+        return acc + curr.balance;
+    }, 0) / balances.length;
+    const taxThreshold = Math.ceil(Math.min(averageBalance, await getUserBalance(octoUser) ?? Number.MAX_VALUE));
+    return taxThreshold;
+}
+
 export async function fileTaxes(): Promise<Tax[]> {
     const balances: Balance[] = await getAllBalances(-1);
 
-    const octoUser: User = client.users.cache.get("167925663485919232") as User;
     const taxExempt: string[] = ["167925663485919232"]; // Octo
 
     const averageBalance = balances.reduce((acc, curr) => {
         return acc + curr.balance;
     }, 0) / balances.length;
-    const taxThreshold = Math.ceil(Math.min(averageBalance, await getUserBalance(octoUser) ?? Number.MAX_VALUE));
+    const taxThreshold = await getTaxThreshold(balances);
 
     const taxes: Tax[] = [];
     const taxableBalances = balances.filter((b) => b.balance > taxThreshold && !taxExempt.includes(b.user));
-    taxableBalances.forEach((e) => {
-        const subtraction = calculateTax(e.balance, taxThreshold);
-        e.balance -= subtraction;
-        taxes.push({user: e.user, newBalance: e.balance, tax: subtraction});
-    });
+    for(let i = 0; i < taxableBalances.length; i++) {
+        const b = taxableBalances[i];
+        const baseTax = await calculateTax(b.balance, taxThreshold);
+        const realTax = Math.max(baseTax - b.taxDeductible, 0);
+
+        b.taxDeductible = Math.max(b.taxDeductible - Math.max(baseTax - realTax, 1), 0); // Always minus at least 1 per day. Prevents tax deductibles from lasting forever.
+        b.balance -= realTax;
+        taxes.push({user: b.user, newBalance: b.balance, tax: realTax});
+    }
+
     await massUpdateBalances(taxableBalances);
-    taxes.sort((a, b) => b.tax - a.tax);
-    return taxes;
+    return taxes.filter((t) => t.tax > 0).sort((a, b) => b.tax - a.tax);
 }
 
 export async function generateTaxReport(taxes: Tax[]): Promise<MessageEmbed> {

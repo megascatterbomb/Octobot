@@ -11,6 +11,11 @@ const EvalEvent: DiscordEvent<"messageCreate"> = {
             return;
         }
         const command = message.content.substring(6);
+
+        // Imports for eval
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const mongoose = require("mongoose");
+
         try {
             const result = await eval(command) as string + "";
             await message.channel.send(result);

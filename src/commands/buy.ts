@@ -9,7 +9,7 @@ import {
     UserType,
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
-import { getUserBalance, subtractBalance } from "../database/octobuckBalance";
+import { addTaxDeduction, getUserBalance, subtractBalance } from "../database/octobuckBalance";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/types";
 import ChannelCommand from "../extensions/channelCommand";
@@ -53,6 +53,7 @@ export default class BuyCommand extends ChannelCommand {
             const err: string = await shopItem.effect(message, target);
             if(err === "") {
                 await subtractBalance(message.author, discountPrice);
+                await addTaxDeduction(message.author, discountPrice);
                 await logShopTransaction(message.author, this.itemNum, discountPrice);
             } else {
                 throw new Error(err);
