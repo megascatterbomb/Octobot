@@ -192,7 +192,6 @@ export async function setBalance(user: User, amount: number): Promise<string> {
 export async function massUpdateBalances(newBalances: Balance[]) {
     for(let i = 0; i < newBalances.length; i++) {
         const b = newBalances[i];
-        console.log(b);
         await octobuckBalance.findOneAndUpdate({user: b.user}, {$set: {balance: b.balance, taxDeductible: b.taxDeductible}});
     }
     return;
