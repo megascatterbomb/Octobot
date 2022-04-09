@@ -64,7 +64,8 @@ export async function fileTaxes(): Promise<Tax[]> {
     const taxThreshold = await getTaxThreshold(balances);
 
     const taxes: Tax[] = [];
-    const taxableBalances = balances.filter((b) => b.balance > taxThreshold && !taxExempt.includes(b.user));
+    // Filters tax exempt + entries that do not require updating
+    const taxableBalances = balances.filter((b) => (b.balance > taxThreshold || b.taxDeductible > 0) && !taxExempt.includes(b.user));
     for(let i = 0; i < taxableBalances.length; i++) {
         const b = taxableBalances[i];
         const baseTax = await calculateTax(b.balance, taxThreshold);
