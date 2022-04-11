@@ -7,11 +7,15 @@ import { logRandomDropClaim } from "../utilities/log";
 
 const counterStart = 1975; // Should be equal or under counterThreshold
 const counterThreshold = 2000; // RNG has to exceed this threshold to trigger
+
+// Probability of a particular value is inversely proportional to (1/value)^exponential. Should be close to and above 1.
+// Increasing this disproportionately decreases the likelihood of rare drops.
+const exponential = 1.1; 
 let counter = counterStart;
 
 const reactionEmoji = "Octocoin";
 
-const probs: number[] = [3, 5, 6, 7, 12, 20, 28, 30, 50, 100];
+const values: number[] = [3, 5, 6, 7, 12, 20, 28, 30, 50, 100];
 
 const blockedChannels: string[] = ["828771529469853766", "887720173136658507", "789098821875531789"]; // Secret links, secret artist channel, spam chat
 const blockedCategories: string[] = ["789109056756776971", "789098821875531788"]; // Super secret, Important stuff
@@ -82,17 +86,17 @@ export function getCounterValue(): number {
 
 function getOctobuckValue(): number {
     // Reciprocals used to give high-value Octobucks the lowest probability.
-    const sortedProbs = probs.sort((a, b) => b - a);
-    const randomValue: number = Math.random() * sortedProbs.reduce((acc, curr) => acc + (1/curr), 0);
+    const sortedValues = values.sort((a, b) => b - a);
+    const randomValue: number = Math.random() * sortedValues.reduce((acc, curr) => acc + ((1/curr) ** exponential), 0);
     let threshold = 0;
-    for(let i = 0; i < sortedProbs.length; i++) {
-        threshold += 1/sortedProbs[i];
+    for(let i = 0; i < sortedValues.length; i++) {
+        threshold += (1/sortedValues[i]) ** exponential;
         if(randomValue < threshold) {
-            return sortedProbs[i];
+            return sortedValues[i];
         }
     }
     // If for some reason the loop doesnt resolve, get the lowest value Octobuck.
-    return sortedProbs[-1];
+    return sortedValues[-1];
 }
 
 export default RandomDropEvent;
