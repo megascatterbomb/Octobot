@@ -48,7 +48,7 @@ export async function addTicket(user: User) {
         user: user.id
     });
     const jackpot = (await getCurrentLottery()).jackpot;
-    await lottery.findOneAndUpdate({}, {jackpot: jackpot+5});
+    await lottery.findOneAndUpdate({}, {jackpot: jackpot+3});
 }
 
 export async function getTicket(user: User): Promise<LotteryTicket | undefined> {
