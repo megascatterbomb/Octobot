@@ -48,7 +48,7 @@ export default class FileTaxCommmand extends ChannelCommand {
         const tax = await calculateTax(balance);
 
         const messageString = deduct === 0 ? ("Tax info for " + displayName + ":\n```Tax to be paid: $" + tax + "```") : 
-            ("Tax info for " + displayName + ":\n```Base tax to be paid by " + displayName + ": $" + tax + "\nTotal deductibles: $" + deduct + 
+            ("Tax info for " + displayName + ":\n```Base tax to be paid: $" + tax + "\nTotal deductibles: $" + deduct + 
             "\nActual tax to be paid: $" + Math.max(tax-deduct, 0) + "```");
         message.reply(messageString);
     }
