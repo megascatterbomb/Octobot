@@ -16,8 +16,8 @@ import {
     OwnerOnly,
 } from "@frasermcc/overcord";
 import { AnyChannel, Channel, GuildMember, Message, StageChannel, TextChannel, ThreadChannel, User, VoiceChannel } from "discord.js";
-import { addBalance, registerBalance, setBalance } from "../database/octobuckBalance";
-import { getDiscordName } from "../utilities/helpers";
+import { addBalance, registerBalance, setBalance } from "../../database/octobuckBalance";
+import { getDiscordName } from "../../utilities/helpers";
 
 @Alias("messagechannel", "msgchannel", "msgc")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })

@@ -12,17 +12,14 @@ import {
     Described,
 } from "@frasermcc/overcord";
 import { Message } from "discord.js";
-import { setShopOpen } from "./buy";
+import { getCounterValue } from "../../events/randomDrops";
 
-@Alias("open")
-@Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
+@Alias("counter")
 @Permit("ADMINISTRATOR")
-@Described("Opens the shop")
-export default class OpenCommand extends Command {
+@Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
+export default class CounterCommand extends Command {
 
     async execute(message: Message, client: Client) {
-        console.log("Shop Opened"); 
-        setShopOpen(true);
-        message.reply("Shop has been opened!");
+        message.reply("" + getCounterValue());
     }
 }

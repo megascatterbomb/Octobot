@@ -13,8 +13,8 @@ import {
     Described,
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
-import { addBalance, registerBalance, setBalance } from "../database/octobuckBalance";
-import { getDiscordName } from "../utilities/helpers";
+import { addBalance, registerBalance, setBalance } from "../../database/octobuckBalance";
+import { getDiscordName } from "../../utilities/helpers";
 
 @Alias("setbalance", "set")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })

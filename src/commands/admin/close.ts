@@ -7,7 +7,7 @@ import {
     Described,
 } from "@frasermcc/overcord";
 import { Message } from "discord.js";
-import { setShopOpen } from "./buy";
+import { setShopOpen } from "../buy";
 
 @Alias("close")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
