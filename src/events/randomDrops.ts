@@ -10,7 +10,7 @@ const counterThreshold = 2000; // RNG has to exceed this threshold to trigger
 
 // Probability of a particular value is inversely proportional to (1/value)^exponential. Should be close to and above 1.
 // Increasing this disproportionately decreases the likelihood of rare drops.
-const exponential = 1.1; 
+const exponential = 1.4; 
 const maxProbShare = 1/4; // Prevents very small octobuck values from dominating the probability.
 
 let counter = counterStart;
