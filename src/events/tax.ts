@@ -10,6 +10,8 @@ import { allowedChannels, logChannel } from "../utilities/types";
 
 type Tax = {user: string, tax: number, newBalance: number};
 
+const minTaxThreshold = 35;
+
 const taxBrackets: {thresMult: number, percent: number}[] = 
     [{thresMult: 1, percent: 1}, {thresMult: 2, percent: 2}, {thresMult: 3, percent: 3}, {thresMult: 4, percent: 4},
         {thresMult: 5, percent: 5}, {thresMult: 10, percent: 10}, {thresMult: 15, percent: 12.5}, {thresMult: 20, percent: 15}];
@@ -49,7 +51,7 @@ async function getTaxThreshold(balances?: Balance[]) {
     const averageBalance = balances.reduce((acc, curr) => {
         return acc + curr.balance;
     }, 0) / balances.length;
-    const taxThreshold = Math.ceil(Math.min(averageBalance, await getUserBalance(octoUser) ?? Number.MAX_VALUE));
+    const taxThreshold = Math.ceil(Math.max(minTaxThreshold, Math.min(averageBalance, await getUserBalance(octoUser) ?? Number.MAX_VALUE)));
     return taxThreshold;
 }
 
