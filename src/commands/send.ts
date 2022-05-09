@@ -17,7 +17,7 @@ import { addBalance, registerBalance, setBalance, transferFunds } from "../datab
 import ChannelCommand from "../extensions/channelCommand";
 import { getDiscordName } from "../utilities/helpers";
 
-@Alias("send", "trade")
+@Alias("send", "trade", "give")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Transfer funds to another user")
 export default class SendCommand extends ChannelCommand {
