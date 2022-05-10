@@ -19,47 +19,63 @@ import { getPricingInfoForUser, shopItems } from "../utilities/shop";
 import { SpecialRole } from "../utilities/config";
 import { shopOpen } from "./buy";
 
+const pageSize = 5;
+
 @Alias("shop")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("View items available for purchase")
 export default class ShopCommand extends ChannelCommand {
+    @Argument({ type: new IntegerType(), description: "Choose a page of the shop"})
+        page!: number;
 
     async execute(message: Message, client: Client) {
         if(!shopOpen) {
             message.channel.send("Sorry, the shop is closed. Come back later.");
             return;
         }
-        const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild);
+        const embed: MessageEmbed = await generateRichEmbed(message.author, message?.guild, this.page);
         message.reply({embeds: [embed]});
     }
 }
 
-async function generateRichEmbed(user: User, guild: Guild | null): Promise<MessageEmbed> {
+async function generateRichEmbed(user: User, guild: Guild | null, page: number): Promise<MessageEmbed> {
+
+    const shopItemCount = shopItems.size;
+    const maxPages = Math.ceil(shopItemCount/pageSize);
+
+    if(page < 1 || page > maxPages) {
+        throw new Error("Invalid Page number. Page must be between 1 and " + maxPages);
+    }
 
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
-        .setTitle("Octo GAMING Store")
-        .setDescription("Purchase an item using `$buy #` eg: `$buy 1` \nFor commands that require a target, mention the target after the number:\n`$buy 2 @Octo`")
+        .setTitle("Octo GAMING Store - Page " + page + " of " + maxPages)
+        .setDescription("Purchase items using the `$buy` command. Exact syntax is listed for each command.")
         .setFooter({text: "Purchases are non-refundable. Spend wisely!"});
     
     const fields: EmbedFieldData[] = [];
 
     const userSpecialRoles: SpecialRole[] = await convertToRolesEnum(await getSpecialRoles(user, guild));
 
-    let itemID = 1;
+    let itemCounter = 0; // One based, but start at zero to account for counter
 
     for(const item of shopItems.values()){
+        itemCounter++;
+        if(itemCounter > shopItemCount) {
+            break;
+        } else if(Math.ceil(itemCounter / pageSize) !== page) {
+            continue;
+        }
 
         // Get the minimum price the user is eligible for.
         const { specialRole, discountPrice } = await getPricingInfoForUser(user, guild, item);
         const hasDiscount: boolean = specialRole !== "";
         
         const field = {
-            name: "#" + itemID + ": " + item.name + " - " + (hasDiscount ? "~~$" + item.basePrice + "~~" : "$" + item.basePrice),
-            value: (hasDiscount ? "**<@&" + specialRole + "> special price: $" + discountPrice + "**" + "\n" : "") + item.description
+            name: /*"#" + itemID + ": " +*/ item.name + " - " + (hasDiscount ? "~~$" + item.basePrice + "~~" : "$" + item.basePrice),
+            value: (hasDiscount ? "**<@&" + specialRole + "> special price: $" + discountPrice + "**" + "\n" : "") + ("`$buy " + item.commandSyntax + "`\n") + item.description
         };
         fields.push(field);
-        itemID++;
     }
 
     embed.addFields(fields);
