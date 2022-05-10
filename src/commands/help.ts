@@ -38,8 +38,11 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$balance,  $bal,  $money  -  Args: `Target (User)`",
         value: "Get the balance of a user. Running the command with no target checks your own balance."
     },{
-        name: "$buy  -  Args: `Shop Item (number), Target (User)`",
-        value: "Buy an item from the shop. Some items require a target that the item will be used on."
+        name: "$buy  -  Args: `Shop Item (string), Argument (any)`",
+        value: "Buy an item from the shop. Some items require an argument that changes how the item behaves."
+    },{
+        name: "$give,  $send,  $trade  -  Args: `Recipient (User), Amount (number)`",
+        value: "Send someone your precious Octobucks."
     },{
         name: "$help,  $?  -  Args: `none`",
         value: "Display this help menu."
@@ -53,10 +56,7 @@ async function generateRichEmbed(client: Client): Promise<MessageEmbed> {
         name: "$ping,  $hello,  $test  -  Args: `none`",
         value: "Check if Octobot is alive and well."
     },{
-        name: "$send,  $trade  -  Args: `Recipient (User), Amount (number)`",
-        value: "Send someone your precious Octobucks."
-    },{
-        name: "$shop  -  Args: `none`",
+        name: "$shop  -  Args: `Page (number)`",
         value: "View items available for purchase, including any special discounts you're eligible for."
     },{
         name: "$stats  -  Args: `none`",
