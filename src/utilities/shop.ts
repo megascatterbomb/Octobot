@@ -1,6 +1,6 @@
 // Shop items are concretely defined here. Changes require update to the code.
 
-import { Collection, Message, User, Permissions, GuildMember, Guild } from "discord.js";
+import { Collection, Message, User, Permissions, GuildMember, Guild, TextChannel } from "discord.js";
 import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
@@ -16,10 +16,10 @@ export type ShopItem = {
     // Additional arguments are the responsibility of shop item implementers to manage.
     // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    effect: (message: Message, ...args: any[]) => Promise<string>,
+    effect: (message: Message, argument: string) => Promise<string>,
     scheduledEvent: null | ((userID: string, guildID: string) => Promise<string>),
     description: string,
-    requiresTarget: boolean
+    requiresArgument: boolean
 }
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
@@ -36,7 +36,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         return "This shopItem doesn't implement any scheduled events.";
     },
-    requiresTarget: false, 
+    requiresArgument: false, 
     description: "- Gives you a chance at winning a prize of Octobucks.\n- The prize increases as more tickets are purchased.\n- Lottery is drawn daily at midnight UTC.\n - Type `$lottery` to check the lottery status."
     }],
 
@@ -70,14 +70,14 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         }
         return "";
     },
-    requiresTarget: false, 
+    requiresArgument: false, 
     description: "- Gives you permission to change your nickname for 5 minutes.\n- Once that time's up you're stuck with whatever you chose!"
     }],
 
 
     ["muteShort", {name: "Mute Member (short)", commandSyntax: "muteShort <user>", basePrice: 25, roleDiscounts: [],
-        effect: async (message: Message, target: User): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+        effect: async (message: Message, argument: string): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -110,7 +110,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             return "";
         },
-        requiresTarget: true, 
+        requiresArgument: true, 
         description: "- Mute some sorry sucker for 15 minutes.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
@@ -128,14 +128,14 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         return "This shopItem doesn't implement any scheduled events.";
     },
-    requiresTarget: false, 
+    requiresArgument: false, 
     description: "- These keys will give you access to the dusty, cramped corners of Octo's basement.\n- Become a <@&" + basementDwellerRole + "> like us!" 
     }],
 
 
     ["muteMedium", {name: "Mute Member (medium)", commandSyntax: "muteMedium <user>", basePrice: 45, roleDiscounts: [],
-        effect: async (message: Message, target: User): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+        effect: async (message: Message, argument: string): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -168,7 +168,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             return "";
         },
-        requiresTarget: true, 
+        requiresArgument: true, 
         description: "- Mute an even sorrier sucker for 30 minutes.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
@@ -186,14 +186,14 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
         return "This shopItem doesn't implement any scheduled events.";
     },
-    requiresTarget: false, 
+    requiresArgument: false, 
     description: "- Gain the unholy power of posting images and embedding links in <#818595825143382076> and become an <@&" + offTopicImageRole + ">" 
     }],
 
 
     ["muteLong", {name: "Mute Member (LONG)", commandSyntax: "muteLong <user>", basePrice: 75, roleDiscounts: [],
-        effect: async (message: Message, target: User): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
+        effect: async (message: Message, argument: string): Promise<string> => {
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -226,7 +226,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             return "";
         },
-        requiresTarget: true, 
+        requiresArgument: true, 
         description: "- Mute the sorriest sucker you know for a whole hour.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
         + funnyMuteRole + "> role." 
     }],
@@ -237,6 +237,19 @@ async function checkIfFunnyMuted(targetMember: GuildMember): Promise<boolean> {
     await getScheduledEvent(targetMember.user, targetMember.guild, "muteShort") !== null ||
     await getScheduledEvent(targetMember.user, targetMember.guild, "muteMedium") !== null ||
     await getScheduledEvent(targetMember.user, targetMember.guild, "muteLong") !== null;
+}
+
+// Only arguments of the type listed here may be used as ShopItem arguments
+async function interpretArgument(arg: string): Promise<User | TextChannel | null> {
+    const id = arg.trim().slice(2, -1); // Turns <@12345> into 12345
+    if(client.users.cache.has(id)) {
+        return (client.users.cache.get(id) as User);
+    }
+    if(client.channels.cache.has(id) && client.channels.cache.get(id)?.type === "GUILD_TEXT") {
+        return (client.channels.cache.get(id) as TextChannel);
+    }
+    
+    return null;
 }
 
 export async function getPricingInfoForUser(user: User, guild: Guild | null, item: ShopItem): Promise<{specialRole: string, discountPrice: number}> {

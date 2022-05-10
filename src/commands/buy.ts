@@ -25,15 +25,15 @@ export let shopOpen = true;
 export default class BuyCommand extends ChannelCommand {
     @Argument({type: new StringType(), description: "The item to buy", optional: true})
         itemName!: string;
-    @Argument({type: new UserType() || undefined, description: "User to target (required for some items)", optional: true})
-        target!: User;
+    @Argument({type: new StringType() || undefined, description: "Argument for shop items (required for some items)", optional: true})
+        argument!: string;
 
     async execute(message: Message, client: Client) {
         if(!shopOpen) {
             message.reply("Sorry, the shop is closed. Come back later.");
             return;
         }
-        const target = this.target ?? null; 
+        const argument = this.argument ?? null; 
         if(this.itemName === undefined || this.itemName === "") {
             new ShopCommand().execute(message, client);
             return;
@@ -44,17 +44,17 @@ export default class BuyCommand extends ChannelCommand {
             throw new Error("\"" + this.itemName + "\" isn't a valid item name. Use $shop to view available items");
         }
         const { specialRole, discountPrice } = await (await getPricingInfoForUser(message.author, message.guild, shopItem));
-        const requiresTarget: boolean = shopItem.requiresTarget;
-        if(requiresTarget && target === null) {
+        const requiresArgument: boolean = shopItem.requiresArgument;
+        if(requiresArgument && argument === null) {
             throw new Error("You need to provide an arugment for this item. Syntax: $buy " + this.itemName + " @Target");
-        } else if(!requiresTarget && target !== null) {
+        } else if(!requiresArgument && argument !== null) {
             throw new Error("This item cannot accept an argument. Syntax: $buy " + shopItem.commandSyntax);
         }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
             message.reply({content: "This is provided for free to players with the <@&" + specialRole + "> role. You do not need to purchase it.", allowedMentions: {roles: []}}); 
         } else if(currentBalance >= discountPrice) {
-            const err: string = await shopItem.effect(message, target);
+            const err: string = await shopItem.effect(message, argument);
             if(err === "") {
                 await subtractBalance(message.author, discountPrice);
                 await addTaxDeduction(message.author, discountPrice);
