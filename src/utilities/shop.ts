@@ -6,6 +6,7 @@ import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
 import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole } from "./config";
+import { TextChannelType, UserType } from "@frasermcc/overcord";
 
 export type ShopItem = {
     name: string,
@@ -75,9 +76,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteShort", {name: "Mute Member (short)", commandSyntax: "muteShort <user>", basePrice: 25, roleDiscounts: [],
+    ["muteshort", {name: "Mute Member (short)", commandSyntax: "muteShort <user>", basePrice: 25, roleDiscounts: [],
         effect: async (message: Message, argument: string): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument, message) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -93,7 +94,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 15*60000); // 15 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
-            await createScheduledEvent("muteShort", targetMember.user.id, targetMember.guild.id, endDate);
+            await createScheduledEvent("muteshort", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
@@ -133,9 +134,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteMedium", {name: "Mute Member (medium)", commandSyntax: "muteMedium <user>", basePrice: 45, roleDiscounts: [],
+    ["mutemedium", {name: "Mute Member (medium)", commandSyntax: "muteMedium <user>", basePrice: 45, roleDiscounts: [],
         effect: async (message: Message, argument: string): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument, message) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -151,7 +152,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 30*60000); // 30 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
-            await createScheduledEvent("muteMedium", targetMember.user.id, targetMember.guild.id, endDate);
+            await createScheduledEvent("mutemedium", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
@@ -174,7 +175,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["offTopic", {name: "#off-topic Image Perms", commandSyntax: "offTopic", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+    ["offtopic", {name: "#off-topic Image Perms", commandSyntax: "offTopic", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
     effect: async (message: Message): Promise<string> => {
         if(message.member?.roles.cache.get(offTopicImageRole) !== undefined) {
@@ -191,9 +192,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteLong", {name: "Mute Member (LONG)", commandSyntax: "muteLong <user>", basePrice: 75, roleDiscounts: [],
+    ["mutelong", {name: "Mute Member (LONG)", commandSyntax: "muteLong <user>", basePrice: 75, roleDiscounts: [],
         effect: async (message: Message, argument: string): Promise<string> => {
-            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument) as User).id);
+            const targetMember: GuildMember | undefined = message.guild?.members.cache.get((await interpretArgument(argument, message) as User).id);
             if(targetMember === undefined) {
                 return "Targeted user is not in the server.";
             } else if(targetMember === message.member) {
@@ -209,7 +210,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 60*60000); // 60 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
-            await createScheduledEvent("muteLong", targetMember.user.id, targetMember.guild.id, endDate);
+            await createScheduledEvent("mutelong", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
             return "";
         }, scheduledEvent: async (userID: string, guildID: string): Promise<string> => {
@@ -234,19 +235,20 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
 
 async function checkIfFunnyMuted(targetMember: GuildMember): Promise<boolean> {
     return  targetMember?.roles.cache.get(funnyMuteRole) !== undefined ||
-    await getScheduledEvent(targetMember.user, targetMember.guild, "muteShort") !== null ||
-    await getScheduledEvent(targetMember.user, targetMember.guild, "muteMedium") !== null ||
-    await getScheduledEvent(targetMember.user, targetMember.guild, "muteLong") !== null;
+    await getScheduledEvent(targetMember.user, targetMember.guild, "muteshort") !== null ||
+    await getScheduledEvent(targetMember.user, targetMember.guild, "mutemedium") !== null ||
+    await getScheduledEvent(targetMember.user, targetMember.guild, "mutelong") !== null;
 }
 
 // Only arguments of the type listed here may be used as ShopItem arguments
-async function interpretArgument(arg: string): Promise<User | TextChannel | null> {
-    const id = arg.trim().slice(2, -1); // Turns <@12345> into 12345
-    if(client.users.cache.has(id)) {
-        return (client.users.cache.get(id) as User);
+async function interpretArgument(arg: string, msg: Message): Promise<User | TextChannel | null> {
+    const user: User = UserType.prototype.parse(arg, msg) as User;
+    if(user !== null) {
+        return user;
     }
-    if(client.channels.cache.has(id) && client.channels.cache.get(id)?.type === "GUILD_TEXT") {
-        return (client.channels.cache.get(id) as TextChannel);
+    const channel = TextChannelType.prototype.parse(arg, msg) as TextChannel;
+    if(channel !== null && channel.type === "GUILD_TEXT") {
+        return channel;
     }
     
     return null;

@@ -39,7 +39,7 @@ export default class BuyCommand extends ChannelCommand {
             return;
         }
         const currentBalance: number = await getUserBalance(message.author) ?? 0;
-        const shopItem: ShopItem = shopItems.get(this.itemName) as ShopItem;
+        const shopItem: ShopItem = shopItems.get(this.itemName.toLowerCase()) as ShopItem;
         if(shopItem === undefined) {
             throw new Error("\"" + this.itemName + "\" isn't a valid item name. Use $shop to view available items");
         }
