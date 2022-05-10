@@ -25,10 +25,11 @@ const pageSize = 5;
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("View items available for purchase")
 export default class ShopCommand extends ChannelCommand {
-    @Argument({ type: new IntegerType(), description: "Choose a page of the shop"})
+    @Argument({ type: new IntegerType(), description: "Choose a page of the shop", optional: true})
         page!: number;
 
     async execute(message: Message, client: Client) {
+        this.page = this.page ?? 1; // @Argument can't set default when execute is called from $buy, so we set it here.
         if(!shopOpen) {
             message.channel.send("Sorry, the shop is closed. Come back later.");
             return;
@@ -50,7 +51,7 @@ async function generateRichEmbed(user: User, guild: Guild | null, page: number):
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
         .setTitle("Octo GAMING Store - Page " + page + " of " + maxPages)
-        .setDescription("Purchase items using the `$buy` command. Exact syntax is listed for each command.")
+        .setDescription("Purchase items using the `$buy` command. Some items require special arguments; look below the item name for exact syntax.")
         .setFooter({text: "Purchases are non-refundable. Spend wisely!"});
     
     const fields: EmbedFieldData[] = [];

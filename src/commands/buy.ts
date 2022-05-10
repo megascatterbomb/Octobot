@@ -7,6 +7,7 @@ import {
     Client,
     Described,
     UserType,
+    StringType,
 } from "@frasermcc/overcord";
 import { Message, User } from "discord.js";
 import { addTaxDeduction, getUserBalance, subtractBalance } from "../database/octobuckBalance";
@@ -22,8 +23,8 @@ export let shopOpen = true;
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
 @Described("Purchase a specified item from the shop ($shop to view)")
 export default class BuyCommand extends ChannelCommand {
-    @Argument({type: new IntegerType(), description: "The item to buy", optional: true})
-        itemNum!: number;
+    @Argument({type: new StringType(), description: "The item to buy", optional: true})
+        itemName!: string;
     @Argument({type: new UserType() || undefined, description: "User to target (required for some items)", optional: true})
         target!: User;
 
@@ -33,18 +34,21 @@ export default class BuyCommand extends ChannelCommand {
             return;
         }
         const target = this.target ?? null; 
-        if(this.itemNum === undefined) {
+        if(this.itemName === undefined || this.itemName === "") {
             new ShopCommand().execute(message, client);
             return;
         }
         const currentBalance: number = await getUserBalance(message.author) ?? 0;
-        const shopItem: ShopItem = shopItems.get(Array.from(shopItems.keys())[this.itemNum - 1]) as ShopItem;
+        const shopItem: ShopItem = shopItems.get(this.itemName) as ShopItem;
+        if(shopItem === undefined) {
+            throw new Error("\"" + this.itemName + "\" isn't a valid item name. Use $shop to view available items");
+        }
         const { specialRole, discountPrice } = await (await getPricingInfoForUser(message.author, message.guild, shopItem));
         const requiresTarget: boolean = shopItem.requiresTarget;
         if(requiresTarget && target === null) {
-            throw new Error("You need to provide a target for this item. Syntax: $buy " + this.itemNum + " @Target");
+            throw new Error("You need to provide an arugment for this item. Syntax: $buy " + this.itemName + " @Target");
         } else if(!requiresTarget && target !== null) {
-            throw new Error("This item cannot accept a target. Syntax: $buy " + this.itemNum);
+            throw new Error("This item cannot accept an argument. Syntax: $buy " + shopItem.commandSyntax);
         }
         if(discountPrice === 0) {
             // allowedMentions specified to avoid pinging role.
@@ -54,7 +58,7 @@ export default class BuyCommand extends ChannelCommand {
             if(err === "") {
                 await subtractBalance(message.author, discountPrice);
                 await addTaxDeduction(message.author, discountPrice);
-                await logShopTransaction(message.author, this.itemNum, discountPrice);
+                await logShopTransaction(message.author, this.itemName, discountPrice);
             } else {
                 throw new Error(err);
             }

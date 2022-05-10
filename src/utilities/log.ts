@@ -12,11 +12,11 @@ export async function logUserTransaction(sender: User | null, receiver: User, am
             " sent " + receiverString + " $" + amount, allowedMentions: {roles: [], users: []}});
 }
 
-export async function logShopTransaction(customer: User, shopItemIndex: number, pricePaid: number): Promise<void> {
+export async function logShopTransaction(customer: User, shopItemName: string, pricePaid: number): Promise<void> {
     const customerString: string = "`" + await getDiscordNameFromID(customer.id, client) + "`";
 
     getLoggingChannel().send({content: "Shop Transaction: " + customerString + 
-            " bought " + Array.from(shopItems.values())[shopItemIndex-1].name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
+            " bought " + shopItems.get(shopItemName)?.name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
 }
 
 export async function logRandomDropClaim(user: User, amountFound: number, counter: number, antiFraud: boolean): Promise<void> {
