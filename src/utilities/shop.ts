@@ -9,6 +9,7 @@ import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwell
 
 export type ShopItem = {
     name: string,
+    commandSyntax: string,
     basePrice: number,
     roleDiscounts: {role: SpecialRole, dPrice: number}[],
     // Purchases should always have a message associated with them; user and guild can be derived from this.
@@ -22,7 +23,7 @@ export type ShopItem = {
 }
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
-    ["lotteryTicket", {name: "Lottery Ticket", basePrice: 5, roleDiscounts:
+    ["lottery", {name: "Lottery Ticket", commandSyntax: "lottery", basePrice: 5, roleDiscounts:
         [ {role: SpecialRole.memeMachine, dPrice: 4} ],
     effect: async (message: Message): Promise<string> => {
         if(await getTicket(message.author) !== undefined) {
@@ -40,7 +41,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["nickname", {name: "Nickname Perms", basePrice: 10, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+    ["nickname", {name: "Nickname Perms", commandSyntax: "nickname", basePrice: 10, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}], 
     effect: async (message: Message): Promise<string> => {
         // Deprecated (handled by commands/shop.ts)
@@ -74,7 +75,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteShort", {name: "Mute Member (short)", basePrice: 25, roleDiscounts: [],
+    ["muteShort", {name: "Mute Member (short)", commandSyntax: "muteShort <user>", basePrice: 25, roleDiscounts: [],
         effect: async (message: Message, target: User): Promise<string> => {
             const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
             if(targetMember === undefined) {
@@ -115,7 +116,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["basementKeys", {name: "Keys to Octo's Basement", basePrice: 35, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+    ["basement", {name: "Keys to Octo's Basement", commandSyntax: "basement", basePrice: 35, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
     effect: async (message: Message): Promise<string> => {
         if(message.member?.roles.cache.get(basementDwellerRole) !== undefined) {
@@ -132,7 +133,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteMedium", {name: "Mute Member (medium)", basePrice: 45, roleDiscounts: [],
+    ["muteMedium", {name: "Mute Member (medium)", commandSyntax: "muteMedium <user>", basePrice: 45, roleDiscounts: [],
         effect: async (message: Message, target: User): Promise<string> => {
             const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
             if(targetMember === undefined) {
@@ -173,7 +174,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["offTopicPerms", {name: "#off-topic Image Perms", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
+    ["offTopic", {name: "#off-topic Image Perms", commandSyntax: "offTopic", basePrice: 50, roleDiscounts: [{role: SpecialRole.gamerGod, dPrice: 0}, {role: SpecialRole.gamerPolice, dPrice: 0}, 
         {role: SpecialRole.memeMachine, dPrice: 0}, {role: SpecialRole.famousArtist, dPrice: 0}, {role: SpecialRole.ggsVeteran, dPrice: 0}, {role: SpecialRole.gigaGamer, dPrice: 0}],
     effect: async (message: Message): Promise<string> => {
         if(message.member?.roles.cache.get(offTopicImageRole) !== undefined) {
@@ -190,7 +191,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     }],
 
 
-    ["muteLong", {name: "Mute Member (LONG)", basePrice: 75, roleDiscounts: [],
+    ["muteLong", {name: "Mute Member (LONG)", commandSyntax: "muteLong <user>", basePrice: 75, roleDiscounts: [],
         effect: async (message: Message, target: User): Promise<string> => {
             const targetMember: GuildMember | undefined = message.guild?.members.cache.get(target?.id);
             if(targetMember === undefined) {

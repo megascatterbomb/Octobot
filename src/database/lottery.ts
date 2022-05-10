@@ -109,6 +109,9 @@ async function drawLottery() {
 
 // NEVER call this function outside of /index.ts
 export async function lotteryLoop() {
+    if(process.env.ENVIRONMENT !== "PRODUCTION") {
+        return;
+    }
     try {
         if(await getCurrentLottery() === undefined) {
             refreshLottery();
