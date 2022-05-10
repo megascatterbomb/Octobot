@@ -24,18 +24,4 @@ export const allowedChannels: string[] = [
 
 export const logChannel = "947220771913228288";
 
-export type ShopItem = {
-    name: string,
-    basePrice: number,
-    roleDiscounts: {role: SpecialRole, dPrice: number}[],
-    // Purchases should always have a message associated with them; user and guild can be derived from this.
-    // Additional arguments are the responsibility of shop item implementers to manage.
-    // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    effect: (message: Message, ...args: any[]) => Promise<string>,
-    scheduledEvent: null | ((userID: string, guildID: string) => Promise<string>),
-    description: string,
-    requiresTarget: boolean
-}
-
 //let test: ShopItem = {name: "test", basePrice: 100, roleDiscounts: [], effect: async (initiator: User, user2: User) => console.log("Test")}; 

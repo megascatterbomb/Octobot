@@ -1,6 +1,6 @@
 import { Client, Command } from "@frasermcc/overcord";
 import { Message } from "discord.js";
-import { allowedChannels } from "../utilities/types";
+import { allowedChannels } from "../utilities/config";
 
 export default abstract class ChannelCommand extends Command {
     protected async customCommandBlocker(message: Message, client: Client): Promise<{

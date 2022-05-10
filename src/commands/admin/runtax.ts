@@ -15,7 +15,7 @@ import {
 import { Message, TextChannel } from "discord.js";
 import { fileTaxes, generateTaxReport } from "../../events/tax";
 import ChannelCommand from "../../extensions/channelCommand";
-import { allowedChannels, logChannel } from "../../utilities/types";
+import { allowedChannels, logChannel } from "../../utilities/config";
 
 @Alias("filetax", "runtax")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })

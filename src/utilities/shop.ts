@@ -5,7 +5,21 @@ import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, ShopItem, basementDwellerRole, offTopicImageRole } from "./types";
+import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole } from "./config";
+
+export type ShopItem = {
+    name: string,
+    basePrice: number,
+    roleDiscounts: {role: SpecialRole, dPrice: number}[],
+    // Purchases should always have a message associated with them; user and guild can be derived from this.
+    // Additional arguments are the responsibility of shop item implementers to manage.
+    // returns: true if successfully used. false otherwise. Indicates to caller whether to consume a consumable.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    effect: (message: Message, ...args: any[]) => Promise<string>,
+    scheduledEvent: null | ((userID: string, guildID: string) => Promise<string>),
+    description: string,
+    requiresTarget: boolean
+}
 
 export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     ["lotteryTicket", {name: "Lottery Ticket", basePrice: 5, roleDiscounts:

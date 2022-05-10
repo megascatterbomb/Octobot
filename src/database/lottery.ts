@@ -3,8 +3,8 @@ import { unwatchFile } from "fs";
 import { model, Schema, Model, Types} from "mongoose";
 import { client } from "..";
 import { logLotteryDraw } from "../utilities/log";
-import { shopItems } from "../utilities/shop";
-import { allowedChannels, ShopItem } from "../utilities/types";
+import { shopItems, ShopItem } from "../utilities/shop";
+import { allowedChannels} from "../utilities/config";
 import { addBalance } from "./octobuckBalance";
 
 // Scheduled Event Schema

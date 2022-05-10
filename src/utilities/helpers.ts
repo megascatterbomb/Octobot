@@ -1,5 +1,5 @@
 import { Guild, User, Role, Collection, Message, Client} from "discord.js";
-import { SpecialRole } from "./types";
+import { SpecialRole } from "./config";
 
 export async function getAllRoles(user: User, guild: Guild | null): Promise<Collection<string, Role>> {
     if(guild === null) {

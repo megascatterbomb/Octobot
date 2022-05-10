@@ -18,7 +18,7 @@ import { getUserBalance, getUserBalanceObject } from "../database/octobuckBalanc
 import { calculateTax, fileTaxes, generateTaxReport } from "../events/tax";
 import ChannelCommand from "../extensions/channelCommand";
 import { getDiscordName } from "../utilities/helpers";
-import { allowedChannels, logChannel } from "../utilities/types";
+import { allowedChannels, logChannel } from "../utilities/config";
 
 @Alias("tax")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })

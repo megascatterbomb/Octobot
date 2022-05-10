@@ -2,7 +2,7 @@ import { EmbedFieldData, MessageEmbed, TextChannel, User } from "discord.js";
 import { client } from "..";
 import { Balance, getAllBalances, getUserBalance, massUpdateBalances } from "../database/octobuckBalance";
 import { getDiscordNameFromID } from "../utilities/helpers";
-import { allowedChannels, logChannel } from "../utilities/types";
+import { allowedChannels, logChannel } from "../utilities/config";
 
 // Specify the tax brackets relative to the average balance.
 // Should be ordered lowest bracket to highest.

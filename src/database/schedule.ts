@@ -1,7 +1,7 @@
 import { Guild, User } from "discord.js";
 import { model, Schema, Model, Types} from "mongoose";
 import { shopItems } from "../utilities/shop";
-import { ShopItem } from "../utilities/types";
+import { ShopItem } from "../utilities/shop";
 
 // Scheduled Event Schema
 interface ScheduledEvent {

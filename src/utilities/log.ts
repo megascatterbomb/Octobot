@@ -2,7 +2,7 @@ import { Channel, Client, Guild, GuildChannel, TextChannel, User } from "discord
 import { client } from "..";
 import { getDiscordName, getDiscordNameFromID } from "./helpers";
 import { shopItems } from "./shop";
-import { logChannel } from "./types";
+import { logChannel } from "./config";
 
 export async function logUserTransaction(sender: User | null, receiver: User, amount: number): Promise<void> {
     const senderString: string = sender !== null ? "`" + await getDiscordNameFromID(sender.id, client) + "`" : "The Gamer Gods";

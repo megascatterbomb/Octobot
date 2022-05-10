@@ -16,7 +16,7 @@ import { Collection, EmbedFieldData, Guild, Message, MessageEmbed, MessageEmbedO
 import ChannelCommand from "../extensions/channelCommand";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "../utilities/helpers";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
-import { SpecialRole } from "../utilities/types";
+import { SpecialRole } from "../utilities/config";
 import { shopOpen } from "./buy";
 
 @Alias("shop")

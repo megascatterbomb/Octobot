@@ -11,7 +11,7 @@ import {
 import { Message, User } from "discord.js";
 import { addTaxDeduction, getUserBalance, subtractBalance } from "../database/octobuckBalance";
 import { getPricingInfoForUser, shopItems } from "../utilities/shop";
-import { ShopItem } from "../utilities/types";
+import { ShopItem } from "../utilities/shop";
 import ChannelCommand from "../extensions/channelCommand";
 import ShopCommand from "./shop";
 import { logShopTransaction } from "../utilities/log";
