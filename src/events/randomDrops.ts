@@ -8,6 +8,8 @@ import { logRandomDropClaim } from "../utilities/log";
 const counterStart = 1975; // Should be equal or under counterThreshold
 const counterThreshold = 2000; // RNG has to exceed this threshold to trigger
 
+export let activeTraps = 0;
+
 // Probability of a particular value is inversely proportional to (1/value)^exponential. Should be close to and above 1.
 // Increasing this disproportionately decreases the likelihood of rare drops.
 const exponential = 1.4; 
@@ -79,7 +81,7 @@ export async function doDrop(channel: TextChannel | ThreadChannel, invalidUsers:
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const reactionFilter = (reaction: any, user: any) => {
-        return reaction.emoji.name === reactionEmoji && user.id !== octobuckMessage.client.user?.id && !user.bot;
+        return reaction.emoji.name === reactionEmoji && user.id !== octobuckMessage.client.user?.id && !user.bot && !invalidUsers.includes(user.id);
     };
 
     const returnValue: {user: User | null | undefined, value: number, msg: Message} = {user: undefined, value: valueToSend, msg: octobuckMessage};
@@ -88,7 +90,7 @@ export async function doDrop(channel: TextChannel | ThreadChannel, invalidUsers:
     const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
     
     reactionCollector.on("collect", async (reaction, user) => {
-        if(!claimed && !invalidUsers.includes(user.id)) {
+        if(!claimed) {
             claimed = true;
             returnValue.user = user;
         }
@@ -127,6 +129,14 @@ function getOctobuckValue(): number {
     }
     // If for some reason the loop doesnt resolve, get the lowest value Octobuck.
     return sortedValues[-1];
+}
+
+export function incrementActiveTraps() {
+    activeTraps++;
+}
+
+export function decrementActiveTraps() {
+    activeTraps--;
 }
 
 export default RandomDropEvent;

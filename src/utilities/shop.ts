@@ -7,7 +7,7 @@ import { createScheduledEvent, getScheduledEvent, ScheduledEvent } from "../data
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
 import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole, debtRole } from "./config";
 import { TextChannelType, UserType } from "@frasermcc/overcord";
-import { checkIfDropsBlocked, doDrop } from "../events/randomDrops";
+import { activeTraps, checkIfDropsBlocked, decrementActiveTraps, doDrop, incrementActiveTraps } from "../events/randomDrops";
 import { addBalance, getUserBalance, setBalance, subtractBalance } from "../database/octobuckBalance";
 import { logTrapCardUse } from "./log";
 
@@ -81,11 +81,14 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot set a Trap Card in that channel as you do not have permission to send messages there";
             }
             message.delete();
-            message.channel.send("A trap card was purchased. But who bought it? Where was it placed?");
-            message.author.send("You have purchased a Trap Card and placed it in <#" + targetChannel.id + ">.");
+            //message.channel.send("A trap card was purchased. But who bought it? Where was it placed?");
+            message.author.send("You have purchased a Trap Card and placed it in <#" + targetChannel.id + ">. The trap will activate when the next message is sent, " + 
+                "or after 5 minutes of inactivity.");
 
             // We run this asynchronously so that the purchase can be processed before the trap fires.
             const handleDrop = async () => {
+                incrementActiveTraps();
+                await targetChannel.awaitMessages({max: 1, time: 5 * 60 * 1000});
                 const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
                 drop.user = drop.user ?? message.author;
 
@@ -113,12 +116,13 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                     targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
                         debt + " minutes!");
                 }
-            };
-
-            handleDrop();
-            
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                decrementActiveTraps();
+            };            
             const endDate = new Date(Date.now() + 60*60000); // 1 hour cooldown.
             await createScheduledEvent("trapCardCooldown", message.author.id, message.guild?.id, endDate);
+            handleDrop();
+
             return "";
         },
         description: "- Place a fake Octobuck drop in a channel of your choice.\n" + 
