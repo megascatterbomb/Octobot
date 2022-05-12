@@ -1,5 +1,5 @@
 import { Client, DiscordEvent } from "@frasermcc/overcord";
-import { Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachment, MessageFlags, ReactionCollector, ReactionEmoji, ReactionManager, ReactionUserManager, TextChannel, ThreadChannel, User } from "discord.js";
+import { Channel, Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachment, MessageFlags, ReactionCollector, ReactionEmoji, ReactionManager, ReactionUserManager, TextChannel, ThreadChannel, User } from "discord.js";
 import * as fs from "fs";
 import path from "path";
 import { addBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
@@ -23,10 +23,14 @@ const blockedChannels: string[] = ["828771529469853766", "887720173136658507", "
 const blockedCategories: string[] = ["789109056756776971", "789098821875531788"]; // Super secret, Important stuff
 let blockedUsers: string[] = []; // Dynamically pushed to whenever a drop occurs. Not persisted in DB since this isnt critical.
 
+export async function checkIfDropsBlocked(channel: Channel): Promise<boolean> {
+    return !(channel.type === "GUILD_TEXT" || channel.type === "GUILD_PUBLIC_THREAD" || channel.type === "GUILD_PRIVATE_THREAD") || 
+            blockedChannels.includes(channel.id) || blockedCategories.includes((channel as TextChannel | ThreadChannel)?.parent?.id ?? "");
+}
+
 const RandomDropEvent: DiscordEvent<"messageCreate"> = {
     callback: async (message) => {
-        if(message.author.bot || blockedUsers.includes(message.author.id) || blockedChannels.includes(message.channel.id) || 
-            blockedCategories.includes((message.channel as TextChannel | ThreadChannel)?.parent?.id ?? "")) {
+        if(message.author.bot || blockedUsers.includes(message.author.id) || await checkIfDropsBlocked(message.channel as Channel)) {
             return;
         }
 
@@ -36,51 +40,71 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         const dropOctobuck = Math.random() * counter > counterThreshold;
         if(!dropOctobuck) {
             return;
-        }        
-        const valueToSend: number = getOctobuckValue();
-        const gifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_" + valueToSend + ".gif");
-
-        const octobuckEmoji: GuildEmoji = guild.emojis.cache.find(emoji => emoji.name === reactionEmoji) as GuildEmoji; // Octocoin emoji
-        const octobuckMessage: Message = await message.channel.send({content: "First person to click on the reaction gets the Octobucks!", files: [gifPath]});
-        octobuckMessage.react(octobuckEmoji);
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const reactionFilter = (reaction: any, user: any) => {
-            return reaction.emoji.name === reactionEmoji && user.id !== octobuckMessage.client.user?.id && !user.bot;
-        };
-
-        let claimed = false;
-        const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
+        }
         
-        reactionCollector.on("collect", async (reaction, user) => {
-            if(!claimed) {
-                claimed = true;
-                // Anti fraud measures
-                if(message.channel instanceof ThreadChannel) {
-                    await subtractBalance(user, valueToSend, true);
-                    octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks! Or did they?");
-                    await logRandomDropClaim(user, valueToSend, counter - counterStart, true);
-                } else {
-                    await addBalance(user, valueToSend);
-                    blockedUsers.push(user.id); // Block user from causing drop rate to increase (prevents single-user farming)
-                    setTimeout(() => blockedUsers = blockedUsers.filter(u => u !== user.id), 1800000); // Unblock user after 30 minutes
-                    octobuckMessage.edit("<@" + user.id + "> has claimed " + valueToSend + " Octobucks!");
-                    await logRandomDropClaim(user, valueToSend, counter - counterStart, false);
-                }
-                counter = counterStart;
+        const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(message.channel as TextChannel | ThreadChannel);
+        
+        if(drop.user !== undefined && drop.user !== null) {
+            // Anti fraud measures
+            if(message.channel instanceof ThreadChannel) {
+                await subtractBalance(drop.user, drop.value, true);
+                drop.msg.edit("<@" + drop.user.id + "> has claimed " + drop.value + " Octobucks! Or did they?");
+                await logRandomDropClaim(drop.user, drop.value, counter - counterStart, true);
+            } else {
+                await addBalance(drop.user, drop.value);
+                blockedUsers.push(drop.user.id); // Block user from causing drop rate to increase (prevents single-user farming)
+                setTimeout(() => blockedUsers = blockedUsers.filter(u => u !== drop.user?.id), 1800000); // Unblock user after 30 minutes
+                drop.msg.edit("<@" + drop.user.id + "> has claimed " + drop.value + " Octobucks!");
+                await logRandomDropClaim(drop.user, drop.value, counter - counterStart, false);
             }
-        });
-
-        reactionCollector.on("end", async collected => {
-            if(!claimed && collected.size === 0) {
-                const ruinedGifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_ruined.gif");
-                await octobuckMessage.channel.send({content: "Nobody claimed the " + valueToSend + " Octobucks in time. What a shame!", files: [ruinedGifPath]});
-                await octobuckMessage.delete();
-            }
-        });
+            counter = counterStart;
+        // If nobody claims in time;
+        } else {
+            const ruinedGifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_ruined.gif");
+            await drop.msg.channel.send({content: "Nobody claimed the " + drop.value + " Octobucks in time. What a shame!", files: [ruinedGifPath]});
+            await drop.msg.delete();
+        }
     },
     firesOn: "messageCreate",
 };
+
+export async function doDrop(channel: TextChannel | ThreadChannel): Promise<{user: User|null|undefined, value: number, msg: Message}> {
+
+    const valueToSend: number = getOctobuckValue();
+    const gifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_" + valueToSend + ".gif");
+
+    const octobuckEmoji: GuildEmoji = channel.guild.emojis.cache.find(emoji => emoji.name === reactionEmoji) as GuildEmoji; // Octocoin emoji
+    const octobuckMessage: Message = await channel.send({content: "First person to click on the reaction gets the Octobucks!", files: [gifPath]});
+    octobuckMessage.react(octobuckEmoji);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reactionFilter = (reaction: any, user: any) => {
+        return reaction.emoji.name === reactionEmoji && user.id !== octobuckMessage.client.user?.id && !user.bot;
+    };
+
+    const returnValue: {user: User | null | undefined, value: number, msg: Message} = {user: undefined, value: valueToSend, msg: octobuckMessage};
+
+    let claimed = false;
+    const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
+    
+    reactionCollector.on("collect", async (reaction, user) => {
+        if(!claimed) {
+            claimed = true;
+            returnValue.user = user;
+        }
+    });
+
+    reactionCollector.on("end", async collected => {
+        if(!claimed && collected.size === 0) {
+            returnValue.user = null;
+        }
+    });
+    
+    while(returnValue.user === undefined) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    return returnValue;
+}
 
 export function getCounterValue(): number {
     return counter;
