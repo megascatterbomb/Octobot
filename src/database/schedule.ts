@@ -5,7 +5,7 @@ import { shopItems } from "../utilities/shop";
 import { ShopItem } from "../utilities/shop";
 
 // Scheduled Event Schema
-interface ScheduledEvent {
+export interface ScheduledEvent {
     _id: string,
     user: string,
     guild: string,

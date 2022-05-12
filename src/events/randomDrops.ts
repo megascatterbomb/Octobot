@@ -68,7 +68,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
     firesOn: "messageCreate",
 };
 
-export async function doDrop(channel: TextChannel | ThreadChannel): Promise<{user: User|null|undefined, value: number, msg: Message}> {
+export async function doDrop(channel: TextChannel | ThreadChannel, invalidUsers: string[] = []): Promise<{user: User|null|undefined, value: number, msg: Message}> {
 
     const valueToSend: number = getOctobuckValue();
     const gifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_" + valueToSend + ".gif");
@@ -88,7 +88,7 @@ export async function doDrop(channel: TextChannel | ThreadChannel): Promise<{use
     const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
     
     reactionCollector.on("collect", async (reaction, user) => {
-        if(!claimed) {
+        if(!claimed && !invalidUsers.includes(user.id)) {
             claimed = true;
             returnValue.user = user;
         }

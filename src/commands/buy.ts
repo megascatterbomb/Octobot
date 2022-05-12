@@ -46,7 +46,7 @@ export default class BuyCommand extends ChannelCommand {
         const { specialRole, discountPrice } = await (await getPricingInfoForUser(message.author, message.guild, shopItem));
         const requiresArgument: boolean = shopItem.requiresArgument;
         if(requiresArgument && argument === null) {
-            throw new Error("You need to provide an arugment for this item. Syntax: $buy " + this.itemName + " @Target");
+            throw new Error("You need to provide an arugment for this item. Syntax: $buy " + shopItem.commandSyntax);
         } else if(!requiresArgument && argument !== null) {
             throw new Error("This item cannot accept an argument. Syntax: $buy " + shopItem.commandSyntax);
         }

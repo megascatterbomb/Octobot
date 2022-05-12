@@ -161,7 +161,7 @@ export async function subtractBalance(user: User, amount: number, clampBalance =
     };
 
     await octobuckBalance.findOneAndUpdate({user: user.id}, balance);
-    await logBalanceChange(user, -amount, oldBalance, newBalance);
+    await logBalanceChange(user, -Math.min(amount, oldBalance - newBalance), oldBalance, newBalance);
     return "";
 }
 

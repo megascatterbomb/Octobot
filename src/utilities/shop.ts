@@ -3,11 +3,13 @@
 import { Collection, Message, User, Permissions, GuildMember, Guild, TextChannel, Role } from "discord.js";
 import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
-import { createScheduledEvent, getScheduledEvent } from "../database/schedule";
+import { createScheduledEvent, getScheduledEvent, ScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole } from "./config";
+import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole, debtRole } from "./config";
 import { TextChannelType, UserType } from "@frasermcc/overcord";
-import { checkIfDropsBlocked } from "../events/randomDrops";
+import { checkIfDropsBlocked, doDrop } from "../events/randomDrops";
+import { addBalance, getUserBalance, setBalance, subtractBalance } from "../database/octobuckBalance";
+import { logTrapCardUse } from "./log";
 
 export type ShopItem = {
     name: string,
@@ -65,7 +67,11 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
     ["trapcard", {name: "Trap Card", commandSyntax: "trapCard <text channel>", basePrice: 15, roleDiscounts: [], 
         effect: async (message: Message, argument: string): Promise<string> => {
             const targetChannel: TextChannel | undefined = (await interpretArgument(argument, message)) as TextChannel;
-            if(targetChannel === undefined) {
+            const cooldownEvent = await getScheduledEvent(message.author, message.guild, "trapCardCooldown");
+            if(cooldownEvent !== null) {
+                return "You are on a cooldown for this item. You can purchase it again in " + 
+                    (1 + ((cooldownEvent as unknown as ScheduledEvent).triggerTime.getTime() - Date.now())/(1000 * 60)).toFixed(0) + " minutes";
+            } else if(targetChannel === undefined) {
                 return "That is not a valid channel";
             } else if (targetChannel.type !== "GUILD_TEXT") {
                 return "That channel is not a text channel. You must specify a text channel that isn't a thread";
@@ -74,11 +80,53 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             } else if (!targetChannel.permissionsFor(message.author)?.has(["SEND_MESSAGES", "VIEW_CHANNEL"])) {
                 return "You cannot set a Trap Card in that channel as you do not have permission to send messages there";
             }
-            //await doFakeDrop();
+            message.delete();
+            message.channel.send("A trap card was purchased. But who bought it? Where was it placed?");
+            message.author.send("You have purchased a Trap Card and placed it in <#" + targetChannel.id + ">.");
 
+            // We run this asynchronously so that the purchase can be processed before the trap fires.
+            const handleDrop = async () => {
+                const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
+                drop.user = drop.user ?? message.author;
+
+                const oldBalance = await getUserBalance(drop.user);
+                if(oldBalance !== null) {
+                    await subtractBalance(drop.user, drop.value, true);
+                    logTrapCardUse(drop.user, drop.value, message.author);
+                }
+
+                if(drop.user !== message.author) {
+                    drop.msg.delete();
+                    targetChannel.send("<@" + drop.user.id + "> just activated <@" + message.author.id + ">'s Trap Card!\n" + 
+                        "<@" + message.author.id + "> has stolen $" + drop.value + " from <@" + drop.user.id + ">!");
+                    addBalance(message.author, drop.value);
+                } else {
+                    drop.msg.delete();
+                    targetChannel.send("<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!");
+                }
+
+                const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
+                if(debt > 0) {
+                    const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
+                    await message.guild?.members.cache.get(drop.user.id)?.roles.add(debtRole);
+                    await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
+                    targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
+                        debt + " minutes!");
+                }
+            };
+
+            handleDrop();
+            
+            const endDate = new Date(Date.now() + 60*60000); // 1 hour cooldown.
+            await createScheduledEvent("trapCardCooldown", message.author.id, message.guild?.id, endDate);
             return "";
         },
-        description: "- test",
+        description: "- Place a fake Octobuck drop in a channel of your choice.\n" + 
+            "- This drop subtracts money from the claimant's account and adds it to yours.\n" +
+            "- If their balance goes below zero, they get muted for 1 minute per Octobuck of debt.\n" +
+            "- Users muted due to debt will have the <@&" + debtRole + "> role.\n" +
+            "- If no-one claims the Octobucks, the Trap Card will backfire and affect you instead!\n" + 
+            "- This item can only be purchased once per hour.",
         requiresArgument: true
     }],
 
@@ -94,8 +142,8 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+                return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
             }
@@ -122,7 +170,8 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         return "";
     },
     requiresArgument: false, 
-    description: "- These keys will give you access to the dusty, cramped corners of Octo's basement.\n- Become a <@&" + basementDwellerRole + "> like us!" 
+    description: "- These keys will give you access to the dusty, cramped corners of Octo's basement.\n" +
+                "- Become a <@&" + basementDwellerRole + "> like us!" 
     }],
 
 
@@ -137,8 +186,8 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+                return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
             }
@@ -180,8 +229,8 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.get(cringeMuteRole) !== undefined) {
-                return "This user has been muted by a Moderator. You cannot target them until their current mute has expired.";
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+                return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
             }
@@ -192,8 +241,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             return "";
         },
         requiresArgument: true, 
-        description: "- Mute the sorriest sucker you know for a whole hour.\n- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n- Players muted with this will have the <@&"
-        + funnyMuteRole + "> role." 
+        description: "- Mute the sorriest sucker you know for a whole hour.\n" + 
+            "- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n" + 
+            "- Players muted with this will have the <@&" + funnyMuteRole + "> role." 
     }],
 ]);
 

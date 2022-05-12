@@ -19,6 +19,13 @@ export async function logShopTransaction(customer: User, shopItemName: string, p
             " bought " + shopItems.get(shopItemName)?.name + " for $" + pricePaid, allowedMentions: {roles: [], users: []}});
 }
 
+export async function logTrapCardUse(target: User, valueLost: number, trapper: User) {
+    const targetString: string = "`" + await getDiscordNameFromID(target.id, client) + "`";
+    const trapperString = trapper === target ? "themselves" : "`" + await getDiscordNameFromID(target.id, client) + "`";
+    getLoggingChannel().send({content: "Trap Card: " + targetString + 
+            " lost $" + valueLost + " to a Trap Card placed by " + trapperString, allowedMentions: {roles: [], users: []}});
+}
+
 export async function logRandomDropClaim(user: User, amountFound: number, counter: number, antiFraud: boolean): Promise<void> {
     const messageContent: string ="Found Octobuck: `" + await getDiscordNameFromID(user.id, client) + "` found $" + amountFound + " (Message Count: " + counter 
         + (antiFraud ? ", Anti Fraud measures kicked in, subtracted Octobucks)" : ")");
