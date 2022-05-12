@@ -87,6 +87,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
 
             // We run this asynchronously so that the purchase can be processed before the trap fires.
             const handleDrop = async () => {
+                // This and the decrement at the end of the function needed to prevent trap cards being interrupted by shutdown or restart.
                 incrementActiveTraps();
                 await targetChannel.awaitMessages({max: 1, time: 5 * 60 * 1000});
                 const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
@@ -97,7 +98,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                     await subtractBalance(drop.user, drop.value, true);
                     logTrapCardUse(drop.user, drop.value, message.author);
                 }
-
+                // Post trap card message, add funds to the trap card setter if applicable.
                 if(drop.user !== message.author) {
                     drop.msg.delete();
                     targetChannel.send("<@" + drop.user.id + "> just activated <@" + message.author.id + ">'s Trap Card!\n" + 
@@ -107,7 +108,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                     drop.msg.delete();
                     targetChannel.send("<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!");
                 }
-
+                // Mute users who can't pay the full amount out of balance.
                 const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
                 if(debt > 0) {
                     const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
