@@ -25,4 +25,6 @@ export const allowedChannels: string[] = [
 
 export const logChannel = "947220771913228288";
 
+export const octoUserID = process.env.ENVIRONMENT === "PRODUCTION" ? "167925663485919232" : "193950601271443456"; // Octo in production, mega otherwise.
+
 //let test: ShopItem = {name: "test", basePrice: 100, roleDiscounts: [], effect: async (initiator: User, user2: User) => console.log("Test")}; 

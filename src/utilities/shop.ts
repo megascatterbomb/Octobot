@@ -5,11 +5,12 @@ import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent, ScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
-import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole, debtRole } from "./config";
+import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole, debtRole, octoUserID } from "./config";
 import { TextChannelType, UserType } from "@frasermcc/overcord";
 import { activeTraps, checkIfDropsBlocked, decrementActiveTraps, doDrop, incrementActiveTraps } from "../events/randomDrops";
 import { addBalance, getUserBalance, setBalance, subtractBalance } from "../database/octobuckBalance";
 import { logTrapCardUse } from "./log";
+import { createTask, getAllTasks, getTask } from "../database/octoToDo";
 
 export type ShopItem = {
     name: string,
@@ -106,7 +107,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                     addBalance(message.author, drop.value);
                 } else {
                     drop.msg.delete();
-                    targetChannel.send("<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!");
+                    targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["../../assets/trapCard.???"]});
                 }
                 // Mute users who can't pay the full amount out of balance.
                 const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
@@ -250,6 +251,43 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             "- <@&" + SpecialRole.gamerGod + "> and <@&" + SpecialRole.gamerPolice + "> have immunity.\n" + 
             "- Players muted with this will have the <@&" + funnyMuteRole + "> role." 
     }],
+
+    ["therapy", {name: "Octo Therapy Session", commandSyntax: "therapy", basePrice:250, roleDiscounts: [],
+        effect: async (message: Message, argument: string): Promise<string> => {
+            if(await getTask("Therapy Session", message.author) !== null) {
+                return "You have already booked a therapy session.";
+            }
+            createTask("Therapy Session", "Octo must hold a therapy session with the task issuer.", message.author.id);
+            const octoUser = client.users.cache.get(octoUserID); // Octo
+            octoUser?.send("<@" + message.author.id + "> has purchased the \"Octo Therapy Session\" shop item.");
+            message.reply("Therapy session purchased");
+            return "";
+        },
+        requiresArgument: false,
+        description: "- Legally obliges Octo to spend about 5 minutes talking to you about your day.\n" +
+            "- Will not actually solve your life problems, but hey, at least someone's listening." +
+            "- Octo will contact you after purchase to arrange a 1-on-1 session.\n" +
+            "- For legal reasons this item is a joke (Octo will talk to you though)."
+    }],
+    
+    ["fortnitestream", {name: "Octo Fortnite Stream", commandSyntax: "fortniteStream", basePrice:1000, roleDiscounts: [],
+        effect: async (message: Message, argument: string): Promise<string> => {
+            if(await getTask("Fortnite Stream", message.author) !== null) {
+                return "You have already booked a Fortnite stream.";
+            } else if((await getAllTasks("Fortnite Stream")).length !== 0) {
+                return "Another user has already booked a Fortnite stream.";
+            }
+            createTask("Fortnite Stream", "Octo must do a fortnite stream with whoever issued this task (assuming they want to be there).", message.author.id);
+            const octoUser = client.users.cache.get(octoUserID); // Octo
+            octoUser?.send("<@" + message.author.id + "> has purchased the \"Octo Fortnite Stream\" shop item.");
+            message.reply("Fortnite stream purchased");
+            return "";
+        },
+        requiresArgument: false,
+        description: "- Legally obliges Octo to play Fortnite on stream.\n" +
+            "- The purchaser of this item has the right but not the obligation to queue with Octo.\n" +
+            "- When this item is purchased, no one can purchase it again until Octo completes the Fortnite stream."
+    }]
 ]);
 
 async function checkIfFunnyMuted(targetMember: GuildMember): Promise<boolean> {

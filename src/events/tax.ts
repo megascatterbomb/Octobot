@@ -2,7 +2,7 @@ import { EmbedFieldData, MessageEmbed, TextChannel, User } from "discord.js";
 import { client } from "..";
 import { Balance, getAllBalances, getUserBalance, massUpdateBalances } from "../database/octobuckBalance";
 import { getDiscordNameFromID } from "../utilities/helpers";
-import { allowedChannels, logChannel } from "../utilities/config";
+import { allowedChannels, logChannel, octoUserID } from "../utilities/config";
 
 // Specify the tax brackets relative to the average balance.
 // Should be ordered lowest bracket to highest.
@@ -58,7 +58,7 @@ async function getTaxThreshold(balances?: Balance[]) {
 export async function fileTaxes(): Promise<Tax[]> {
     const balances: Balance[] = await getAllBalances(-1);
 
-    const taxExempt: string[] = ["167925663485919232"]; // Octo
+    const taxExempt: string[] = [octoUserID]; // Octo
 
     const averageBalance = balances.reduce((acc, curr) => {
         return acc + curr.balance;
