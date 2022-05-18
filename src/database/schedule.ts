@@ -82,6 +82,15 @@ async function processScheduledEvent(event: ScheduledEvent): Promise<string> {
     return err;
 }
 
+export async function modifyScheduledEvent(user: User, guild: Guild | null, eventName: string, newEvent: ScheduledEvent): Promise<ScheduledEvent | null> {
+    const oldEvent = await getScheduledEvent(user, guild, eventName);
+    if(oldEvent === null) {
+        return null;
+    }
+    await scheduledEvent.updateOne(oldEvent, newEvent);
+    return newEvent;
+} 
+
 export async function getScheduledEvent(user: User, guild: Guild | null, eventName: string): Promise<ScheduledEvent | null> {
     const event = {
         user: user.id,

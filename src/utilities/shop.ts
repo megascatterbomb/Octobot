@@ -3,7 +3,7 @@
 import { Collection, Message, User, Permissions, GuildMember, Guild, TextChannel, Role, CollectorFilter, MessageCollector, MessageCollectorOptions, AwaitMessagesOptions } from "discord.js";
 import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
-import { createScheduledEvent, getScheduledEvent, ScheduledEvent } from "../database/schedule";
+import { createScheduledEvent, getScheduledEvent, modifyScheduledEvent, ScheduledEvent } from "../database/schedule";
 import { convertToRolesEnum, getAllRoles, getSpecialRoles } from "./helpers";
 import { cringeMuteRole, funnyMuteRole, nickNameRole, SpecialRole, basementDwellerRole, offTopicImageRole, debtRole, octoUserID } from "./config";
 import { TextChannelType, UserType } from "@frasermcc/overcord";
@@ -117,9 +117,19 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 if(debt > 0) {
                     const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
                     await message.guild?.members.cache.get(drop.user.id)?.roles.add(debtRole);
-                    await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
-                    targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
+                    const oldEvent = await getScheduledEvent(drop.user, message.guild, "debt");
+                    // Extend debt if user already has debt.
+                    if(oldEvent !== null) {
+                        modifyScheduledEvent(drop.user, drop.msg.guild, "debt", 
+                            {_id: oldEvent._id, user: drop.user.id, guild: message.guild?.id ?? "", eventName: "debt", 
+                                error: false, triggerTime: new Date(oldEvent.triggerTime.getTime() + debt*60000)});
+                        targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! They are an additional $" + debt + " in debt, so their mute has " +
+                            "been extended by " + debt + " minutes!");
+                    } else {
+                        await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
+                        targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
                         debt + " minutes!");
+                    }
                 }
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 decrementActiveTraps();
