@@ -90,49 +90,53 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             const handleDrop = async () => {
                 // This and the decrement at the end of the function needed to prevent trap cards being interrupted by shutdown or restart.
                 incrementActiveTraps();
-                const filter: AwaitMessagesOptions = {max: 1, time: 5 * 60 * 1000, filter: msg => {
-                    return !msg.author.bot;
-                }};
-                await targetChannel.awaitMessages(filter);
-                const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
-                drop.user = drop.user ?? message.author;
+                try {
+                    const filter: AwaitMessagesOptions = {max: 1, time: 5 * 60 * 1000, filter: msg => {
+                        return !msg.author.bot;
+                    }};
+                    await targetChannel.awaitMessages(filter);
+                    const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
+                    drop.user = drop.user ?? message.author;
 
-                const oldBalance = await getUserBalance(drop.user);
-                if(oldBalance !== null) {
-                    await subtractBalance(drop.user, drop.value, true);
-                }
-                // Post trap card message, add funds to the trap card setter if applicable.
-                if(drop.user !== message.author) {
-                    drop.msg.delete();
-                    await targetChannel.send({content: "<@" + message.author.id + "> just activated his Trap Card!\n" + 
-                        "They have stolen $" + drop.value + " from <@" + drop.user.id + ">!", files: ["./assets/trapcard.gif"]});
-                    await addBalance(message.author, drop.value);
-                } else {
-                    drop.msg.delete();
-                    await targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["./assets/trapCard.gif"]});
-                }
-                logTrapCardUse(drop.user, drop.value, message.author);
-                // Mute users who can't pay the full amount out of balance.
-                const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
-                if(debt > 0) {
-                    const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
-                    await message.guild?.members.cache.get(drop.user.id)?.roles.add(debtRole);
-                    const oldEvent = await getScheduledEvent(drop.user, message.guild, "debt");
-                    // Extend debt if user already has debt.
-                    if(oldEvent !== null) {
-                        modifyScheduledEvent(drop.user, drop.msg.guild, "debt", 
-                            {_id: oldEvent._id, user: drop.user.id, guild: message.guild?.id ?? "", eventName: "debt", 
-                                error: false, triggerTime: new Date(oldEvent.triggerTime.getTime() + debt*60000)});
-                        targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! They are an additional $" + debt + " in debt, so their mute has " +
-                            "been extended by " + debt + " minutes!");
-                    } else {
-                        await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
-                        targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
-                        debt + " minutes!");
+                    const oldBalance = await getUserBalance(drop.user);
+                    if(oldBalance !== null) {
+                        await subtractBalance(drop.user, drop.value, true);
                     }
+                    // Post trap card message, add funds to the trap card setter if applicable.
+                    if(drop.user !== message.author) {
+                        drop.msg.delete();
+                        await targetChannel.send({content: "<@" + message.author.id + "> just activated his Trap Card!\n" + 
+                            "They have stolen $" + drop.value + " from <@" + drop.user.id + ">!", files: ["./assets/trapcard.gif"]});
+                        await addBalance(message.author, drop.value);
+                    } else {
+                        drop.msg.delete();
+                        await targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["./assets/trapCard.gif"]});
+                    }
+                    logTrapCardUse(drop.user, drop.value, message.author);
+                    // Mute users who can't pay the full amount out of balance.
+                    const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
+                    if(debt > 0) {
+                        const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
+                        await message.guild?.members.cache.get(drop.user.id)?.roles.add(debtRole);
+                        const oldEvent = await getScheduledEvent(drop.user, message.guild, "debt");
+                        // Extend debt if user already has debt.
+                        if(oldEvent !== null) {
+                            modifyScheduledEvent(drop.user, drop.msg.guild, "debt", 
+                                {_id: oldEvent._id, user: drop.user.id, guild: message.guild?.id ?? "", eventName: "debt", 
+                                    error: false, triggerTime: new Date(oldEvent.triggerTime.getTime() + debt*60000)});
+                            targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! They are an additional $" + debt + " in debt, so their mute has " +
+                                "been extended by " + debt + " minutes!");
+                        } else {
+                            await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
+                            targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
+                            debt + " minutes!");
+                        }
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                } finally {
+                    decrementActiveTraps();
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                decrementActiveTraps();
             };            
             const endDate = new Date(Date.now() + 60*60000); // 1 hour cooldown.
             await createScheduledEvent("trapCardCooldown", message.author.id, message.guild?.id, endDate);
