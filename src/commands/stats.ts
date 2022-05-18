@@ -13,7 +13,7 @@ import { Balance, getAllBalances } from "../database/octobuckBalance";
 import ChannelCommand from "../extensions/channelCommand";
 import { getDiscordNameFromID } from "../utilities/helpers";
 
-const totalUSDInvested = 200;
+const totalUSDInvested = 250;
 
 @Alias("stats")
 @Inhibit({ limitBy: "USER", maxUsesPerPeriod: 3, periodDuration: 10 })
