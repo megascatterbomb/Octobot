@@ -278,7 +278,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         },
         requiresArgument: false,
         description: "- Legally obliges Octo to spend about 5 minutes talking to you about your day.\n" +
-            "- Will not actually solve your life problems, but hey, at least someone's listening." +
+            "- Will not actually solve your life problems, but hey, at least someone's listening.\n" +
             "- Octo will contact you after purchase to arrange a 1-on-1 session.\n" +
             "- For legal reasons this item is a joke (Octo will talk to you though)."
     }],
