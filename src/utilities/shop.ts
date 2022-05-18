@@ -1,6 +1,6 @@
 // Shop items are concretely defined here. Changes require update to the code.
 
-import { Collection, Message, User, Permissions, GuildMember, Guild, TextChannel, Role } from "discord.js";
+import { Collection, Message, User, Permissions, GuildMember, Guild, TextChannel, Role, CollectorFilter, MessageCollector, MessageCollectorOptions, AwaitMessagesOptions } from "discord.js";
 import { client } from "..";
 import { addTicket, getLotteryDrawTime, getTicket } from "../database/lottery";
 import { createScheduledEvent, getScheduledEvent, ScheduledEvent } from "../database/schedule";
@@ -90,25 +90,28 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             const handleDrop = async () => {
                 // This and the decrement at the end of the function needed to prevent trap cards being interrupted by shutdown or restart.
                 incrementActiveTraps();
-                await targetChannel.awaitMessages({max: 1, time: 5 * 60 * 1000});
+                const filter: AwaitMessagesOptions = {max: 1, time: 5 * 60 * 1000, filter: msg => {
+                    return !msg.author.bot;
+                }};
+                await targetChannel.awaitMessages(filter);
                 const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(targetChannel, [message.author.id]);
                 drop.user = drop.user ?? message.author;
 
                 const oldBalance = await getUserBalance(drop.user);
                 if(oldBalance !== null) {
                     await subtractBalance(drop.user, drop.value, true);
-                    logTrapCardUse(drop.user, drop.value, message.author);
                 }
                 // Post trap card message, add funds to the trap card setter if applicable.
                 if(drop.user !== message.author) {
                     drop.msg.delete();
-                    targetChannel.send("<@" + drop.user.id + "> just activated <@" + message.author.id + ">'s Trap Card!\n" + 
-                        "<@" + message.author.id + "> has stolen $" + drop.value + " from <@" + drop.user.id + ">!");
-                    addBalance(message.author, drop.value);
+                    await targetChannel.send({content: "<@" + message.author.id + "> just activated his Trap Card!\n" + 
+                        "They have stolen $" + drop.value + " from <@" + drop.user.id + ">!", files: ["./assets/trapcard.gif"]});
+                    await addBalance(message.author, drop.value);
                 } else {
                     drop.msg.delete();
-                    targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["../../assets/trapCard.???"]});
+                    await targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["../../assets/trapCard.???"]});
                 }
+                logTrapCardUse(drop.user, drop.value, message.author);
                 // Mute users who can't pay the full amount out of balance.
                 const debt = drop.value - ((oldBalance ?? 0) - (await getUserBalance(drop.user) ?? 0));
                 if(debt > 0) {
