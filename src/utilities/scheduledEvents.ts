@@ -41,7 +41,7 @@ export const scheduledEvents: Map<string, (userID: string, guildID: string) => P
             member = guild?.members.cache.get(userID);
         } catch (e){return "Failed to get information about this event";}
 
-        member?.send("Your cooldown on Trap Cards has expired.");
+        member?.send("Your cooldown on Trap Cards has expired.").catch();
         return "";
     }]
 
