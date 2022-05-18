@@ -21,7 +21,7 @@ export async function logShopTransaction(customer: User, shopItemName: string, p
 
 export async function logTrapCardUse(target: User, valueLost: number, trapper: User) {
     const targetString: string = "`" + await getDiscordNameFromID(target.id, client) + "`";
-    const trapperString = trapper === target ? "themselves" : "`" + await getDiscordNameFromID(target.id, client) + "`";
+    const trapperString = trapper === target ? "themselves" : "`" + await getDiscordNameFromID(trapper.id, client) + "`";
     getLoggingChannel().send({content: "Trap Card: " + targetString + 
             " lost $" + valueLost + " to a Trap Card placed by " + trapperString, allowedMentions: {roles: [], users: []}});
 }
