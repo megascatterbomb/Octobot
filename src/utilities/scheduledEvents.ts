@@ -1,8 +1,22 @@
 import { Message } from "discord.js";
 import { client } from "..";
-import { debtRole, funnyMuteRole } from "./config";
+import { debtRole, funnyMuteRole, nickNameRole } from "./config";
 
 export const scheduledEvents: Map<string, (userID: string, guildID: string) => Promise<string>> = new Map<string, (userID: string, guildID: string) => Promise<string>>([
+
+    ["nickname", async (userID: string, guildID: string): Promise<string> => {
+        let member;
+        try {
+            const guild = client.guilds.cache.get(guildID);
+            member = guild?.members.cache.get(userID);
+        } catch (e){return "Failed to get information about this event";}
+
+        // If the role was removed manually then we don't need to do anything nor do we need to throw an error
+        if(member?.roles.cache.get(nickNameRole) !== undefined) {
+            await member?.roles.remove(nickNameRole);
+        }
+        return "";
+    }],
 
     ["funnyMute", async (userID: string, guildID: string): Promise<string> => {
         let member;
