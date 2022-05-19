@@ -110,7 +110,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                         await addBalance(message.author, drop.value);
                     } else {
                         drop.msg.delete();
-                        await targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["./assets/trapCard.gif"]});
+                        await targetChannel.send({content: "<@" + message.author.id + ">'s Trap Card has backfired! They lost $" + drop.value + "!", files: ["./assets/trapcard.gif"]});
                     }
                     logTrapCardUse(drop.user, drop.value, message.author);
                     // Mute users who can't pay the full amount out of balance.
