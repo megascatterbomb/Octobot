@@ -84,7 +84,9 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             message.delete();
             //message.channel.send("A trap card was purchased. But who bought it? Where was it placed?");
             message.author.send("You have purchased a Trap Card and placed it in <#" + targetChannel.id + ">. The trap will activate when the next message is sent, " + 
-                "or after 5 minutes of inactivity.");
+                "or after 5 minutes of inactivity.").catch(() => {
+                message.channel.send("You purchased a trap card, but we couldn't DM you to tell you. Rest assured it has been placed.");
+            });
 
             // We run this asynchronously so that the purchase can be processed before the trap fires.
             const handleDrop = async () => {
