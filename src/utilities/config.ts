@@ -1,5 +1,8 @@
 import { Message, User } from "discord.js";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
+
 export enum SpecialRole {
     gamerGod = "789100430964949022",
     gamerPolice = "789099931889041409",
