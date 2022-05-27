@@ -304,7 +304,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
         },
         requiresArgument: false,
         description: "- Legally obliges Octo to play Fortnite on stream.\n" +
-            "- The purchaser of this item has the right but not the obligation to queue with Octo.\n" +
+            "- The purchaser of this item can queue with Octo, assuming scheduling works out.\n" +
             "- When this item is purchased, no one can purchase it again until Octo completes the Fortnite stream."
     }]
 ]);
