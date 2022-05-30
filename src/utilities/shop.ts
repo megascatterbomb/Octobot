@@ -167,7 +167,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole)) {
                 return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
@@ -211,7 +211,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole)) {
                 return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
@@ -254,7 +254,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                 return "You cannot target a bot.";
             } else if(targetMember.roles.cache.hasAny(SpecialRole.gamerGod, SpecialRole.gamerPolice)) {
                 return "You cannot target Gamer Gods or Gamer Police.";
-            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole) !== undefined) {
+            } else if(targetMember?.roles.cache.hasAny(cringeMuteRole, debtRole)) {
                 return "This user has been muted by other means. You cannot target them until their current mute has expired.";
             } else if(await checkIfFunnyMuted(targetMember)) {
                 return "This user has already been muted by another paying customer. You cannot target them until their current mute has expired.";
