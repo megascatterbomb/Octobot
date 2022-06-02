@@ -44,9 +44,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
             return;
         }
         
-        try {
-            const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(message.channel as TextChannel | ThreadChannel);
-        } catch {return;}
+        const drop: {user: User|null|undefined, value: number, msg: Message} = await doDrop(message.channel as TextChannel | ThreadChannel);
         
         if(drop.user !== undefined && drop.user !== null) {
             // Anti fraud measures
