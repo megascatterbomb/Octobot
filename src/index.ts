@@ -23,7 +23,6 @@ export let client: Client;
     console.log("Connected to Discord");
     const channel = client.channels.cache.get(allowedChannels[0]) as TextChannel | undefined;
     channel?.send("Octobot launched successfully.");
-    console.log("Test 2");
     scheduleLoop();
     lotteryLoop();
     taxLoop();
