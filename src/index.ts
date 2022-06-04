@@ -1,10 +1,11 @@
 import { Client } from "@frasermcc/overcord";
-import { Intents } from "discord.js";
+import { Intents, TextChannel } from "discord.js";
 import connectToDatabase from "./database/mongo";
 import path from "path";
 import { scheduleLoop } from "./database/schedule";
 import { lotteryLoop } from "./database/lottery";
 import { taxLoop } from "./events/tax";
+import { allowedChannels } from "./utilities/config";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 
@@ -20,6 +21,9 @@ export let client: Client;
     const key: string = process.env.DISCORD_TOKEN ?? "invalid key";
     await client.login(key);
     console.log("Connected to Discord");
+    const channel = client.channels.cache.get(allowedChannels[0]) as TextChannel | undefined;
+    channel?.send("Octobot launched successfully.");
+    console.log("Test 2");
     scheduleLoop();
     lotteryLoop();
     taxLoop();
