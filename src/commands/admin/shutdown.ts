@@ -27,6 +27,7 @@ export default class ShutdownCommand extends Command {
 
     async execute(message: Message, client: Client) {
         setShopOpen(false);
+        client.user?.setPresence({status: "dnd"});
         const reply = await message.reply("Shutting down in 5 seconds...");
         await new Promise(resolve => setTimeout(resolve, 5000));
         while(activeTraps > 0) {
@@ -34,6 +35,7 @@ export default class ShutdownCommand extends Command {
             await new Promise(resolve => setTimeout(resolve, 5000));
         }
         await reply.edit("Shutting down...");
+        client.user?.setPresence({status: "invisible"});
         process.exit(0);
     }
 }
