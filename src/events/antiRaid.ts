@@ -10,7 +10,7 @@ let markedSafe = false;
 
 let raidThresholdTimeoutMinutes = 5;
 let raidThresholdSeconds = 30;
-let raidThresholdCount = 10;
+let raidThresholdCount = 20;
 export let raidTriggered = false;
 let recentJoins: GuildMember[] = [];
 let raidJoins: GuildMember[] = [];
