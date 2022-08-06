@@ -12,7 +12,7 @@ let raidThresholdTimeoutMinutes = 5;
 let raidThresholdSeconds = 30;
 let raidThresholdCount = 10;
 export let raidTriggered = false;
-const recentJoins: GuildMember[] = [];
+let recentJoins: GuildMember[] = [];
 let raidJoins: GuildMember[] = [];
 
 const RaidEvent: DiscordEvent<"guildMemberAdd"> = {
@@ -51,6 +51,7 @@ export function EndRaid() {
     timeout = null;
     const raiders = [...raidJoins].filter((value, index, array) => array.findIndex(r => r.id === value.id) === index); // copy and filter duplciates
     raidJoins = [];
+    recentJoins = [];
     raidTriggered = false;
     return raiders;
 }
