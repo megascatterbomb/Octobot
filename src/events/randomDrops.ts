@@ -2,6 +2,7 @@ import { Client, DiscordEvent } from "@frasermcc/overcord";
 import { Channel, Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachment, MessageFlags, ReactionCollector, ReactionEmoji, ReactionManager, ReactionUserManager, TextChannel, ThreadChannel, User } from "discord.js";
 import * as fs from "fs";
 import path from "path";
+import { addJackpot } from "../database/lottery";
 import { addBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
 import { logRandomDropClaim } from "../utilities/log";
 
@@ -65,6 +66,7 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
             const ruinedGifPath = path.resolve(__dirname,"../../assets/octobucks/octobucks_ruined.gif");
             await drop.msg.channel.send({content: "Nobody claimed the " + drop.value + " Octobucks in time. What a shame!", files: [ruinedGifPath]});
             await drop.msg.delete();
+            await addJackpot(drop.value);
         }
     },
     firesOn: "messageCreate",
@@ -87,7 +89,7 @@ export async function doDrop(channel: TextChannel | ThreadChannel, invalidUsers:
     const returnValue: {user: User | null | undefined, value: number, msg: Message} = {user: undefined, value: valueToSend, msg: octobuckMessage};
 
     let claimed = false;
-    const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 15000, max: 1});
+    const reactionCollector: ReactionCollector = octobuckMessage.createReactionCollector({filter: reactionFilter, time: 30000, max: 1});
     
     reactionCollector.on("collect", async (reaction, user) => {
         if(!claimed) {
