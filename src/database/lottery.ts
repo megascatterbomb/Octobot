@@ -47,8 +47,15 @@ export async function addTicket(user: User) {
     await lotteryTicket.create({
         user: user.id
     });
-    const jackpot = (await getCurrentLottery()).jackpot;
-    await lottery.findOneAndUpdate({}, {jackpot: jackpot+3});
+    await addJackpot(3);
+}
+
+async function addRedrawTickets(count = 1) {
+    for(let i = 0; i < count; i++) {
+        await lotteryTicket.create({
+            user: "redraw"
+        });
+    }   
 }
 
 export async function getTicket(user: User): Promise<LotteryTicket | undefined> {
@@ -67,7 +74,12 @@ export async function getLotteryDrawTime(): Promise<Date> {
     return (await getCurrentLottery()).date;
 }
 
-async function refreshLottery(): Promise<Lottery> {
+export async function addJackpot(amountToAdd: number) {
+    const jackpot = (await getCurrentLottery()).jackpot;
+    await lottery.findOneAndUpdate({}, {jackpot: jackpot+amountToAdd});
+}
+
+async function refreshLottery(jackpot = 5): Promise<Lottery> {
     acceptingTickets = false;
     // Ensure lottery ticket is empty
     await lotteryTicket.find({}).deleteMany({});
@@ -75,10 +87,11 @@ async function refreshLottery(): Promise<Lottery> {
     await lottery.find({}).deleteMany({});
     // Upload new lottery
     const dbLottery = {
-        jackpot: 5,
+        jackpot: jackpot,
         date: new Date().setUTCHours(24, 0, 0, 0)
     };
     const newLottery = await new lottery(dbLottery).save();
+    await addRedrawTickets(3);
     acceptingTickets = true;
     return newLottery;
 }
@@ -97,6 +110,18 @@ async function drawLottery() {
     const winningTicket = tickets[Math.floor(Math.random() * tickets.length)];
     const jackpot = (await getCurrentLottery()).jackpot;
 
+    if(winningTicket.user === "redraw") {
+        console.log("Lottery Draw: Nobody won the $" + jackpot + " jackpot. Redrawing in 24 hours!");
+        (client.channels.cache.get(allowedChannels[0]) as TextChannel).send("Nobody won the " + jackpot + "  Octobucks in today's lottery. Adding 10 Octobucks to the jackpot and redrawing in 24 hours!");
+        await lottery.find({}).deleteMany({});
+        const dbLottery = {
+            jackpot: jackpot + 10,
+            date: new Date().setUTCHours(24, 0, 0, 0)
+        };
+        await new lottery(dbLottery).save();
+        return;
+    }
+
     const winnerObject: User = await client.users.fetch(winningTicket.user);
     const result = await addBalance(winnerObject, jackpot);
     if(result !== "") {
@@ -104,6 +129,7 @@ async function drawLottery() {
     }
     (client.channels.cache.get(allowedChannels[0]) as TextChannel).send("<@" + winnerObject.id + "> won " + jackpot + " Octobucks in today's lottery!");
     console.log("Lottery Draw: " + winnerObject.username + " won $" + jackpot);
+    await refreshLottery();
     await logLotteryDraw(winnerObject, jackpot);
 }
 
@@ -121,7 +147,6 @@ export async function lotteryLoop() {
         while(true) {
             if((await getCurrentLottery()).date.getTime() <= Date.now()) {
                 await drawLottery();
-                await refreshLottery();
             }
             await delay((await getCurrentLottery()).date);
         }
