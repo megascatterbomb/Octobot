@@ -79,7 +79,7 @@ export async function addJackpot(amountToAdd: number) {
     await lottery.findOneAndUpdate({}, {jackpot: jackpot+amountToAdd});
 }
 
-async function refreshLottery(jackpot = 5): Promise<Lottery> {
+async function refreshLottery(jackpot = 10): Promise<Lottery> {
     acceptingTickets = false;
     // Ensure lottery ticket is empty
     await lotteryTicket.find({}).deleteMany({});
