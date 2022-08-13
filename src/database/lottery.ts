@@ -63,7 +63,7 @@ export async function getTicket(user: User): Promise<LotteryTicket | undefined> 
 }
 
 export async function getLotteryPlayerCount(): Promise<number> {
-    return await lotteryTicket.count();
+    return await lotteryTicket.count({user: {$ne: "redraw"}});
 }
 
 export async function getLotteryJackpot(): Promise<number> {
