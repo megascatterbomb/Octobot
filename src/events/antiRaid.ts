@@ -18,7 +18,7 @@ let raidJoins: GuildMember[] = [];
 const RaidEvent: DiscordEvent<"guildMemberAdd"> = {
     callback: async (member) => {
         if(!recentJoins.includes(member)) recentJoins.push(member);
-        setTimeout(() => { if(recentJoins.includes(member)) recentJoins.filter(m => m.id !== member.id); } , raidThresholdSeconds * 1000);
+        setTimeout(() => { if(recentJoins.includes(member)) recentJoins = recentJoins.filter(m => m.id !== member.id); } , raidThresholdSeconds * 1000);
 
         if(markedSafe || recentJoins.length < raidThresholdCount) return;
         timeout?.refresh();
