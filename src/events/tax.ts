@@ -1,6 +1,6 @@
 import { EmbedFieldData, MessageEmbed, TextChannel, User } from "discord.js";
 import { client } from "..";
-import { Balance, getAllBalances, getUserBalance, massUpdateBalances } from "../database/octobuckBalance";
+import { addBalance, Balance, getAllBalances, getUserBalance, massUpdateBalances, setBalance } from "../database/octobuckBalance";
 import { getDiscordNameFromID } from "../utilities/helpers";
 import { allowedChannels, logChannel, octoUserID } from "../utilities/config";
 
@@ -55,7 +55,7 @@ async function getTaxThreshold(balances?: Balance[]) {
     return taxThreshold;
 }
 
-export async function fileTaxes(): Promise<Tax[]> {
+export async function fileTaxes(): Promise<{taxes: Tax[], octoGain: number}> {
     const balances: Balance[] = await getAllBalances(-1);
 
     const taxExempt: string[] = [octoUserID]; // Octo
@@ -66,30 +66,44 @@ export async function fileTaxes(): Promise<Tax[]> {
     const taxThreshold = await getTaxThreshold(balances);
 
     const taxes: Tax[] = [];
+    let totalTax = 0;
     // Filters tax exempt + entries that do not require updating
     const taxableBalances = balances.filter((b) => (b.balance > taxThreshold || b.taxDeductible > 0) && !taxExempt.includes(b.user));
     for(let i = 0; i < taxableBalances.length; i++) {
         const b = taxableBalances[i];
         const baseTax = await calculateTax(b.balance, taxThreshold);
         const realTax = Math.max(baseTax - b.taxDeductible, 0);
-
+        totalTax += realTax;
         b.taxDeductible = Math.max(b.taxDeductible - Math.max(baseTax - realTax, 1), 0); // Always minus at least 1 per day. Prevents tax deductibles from lasting forever.
         b.balance -= realTax;
         taxes.push({user: b.user, newBalance: b.balance, tax: realTax});
     }
 
     await massUpdateBalances(taxableBalances);
-    return taxes.filter((t) => t.tax > 0).sort((a, b) => b.tax - a.tax);
+    let octoGain = 0;
+    const octoBalance = balances.find(b => b.user === octoUserID)?.balance;
+    if(octoBalance !== undefined) {
+        const balanceRatio = balances.filter(b => b.user !== octoUserID).reduce((acc, curr) => acc.balance > curr.balance ? acc : curr).balance / octoBalance;
+        octoGain = Math.round(Math.min(totalTax, totalTax * balanceRatio * balanceRatio));
+        const octoUser = client.users.cache.get(octoUserID);
+        if(octoUser !== undefined) {
+            addBalance(octoUser, octoGain);
+        } else {
+            octoGain = 0;
+        }
+    }
+
+    return {taxes: taxes.filter((t) => t.tax > 0).sort((a, b) => b.tax - a.tax), octoGain: octoGain};
 }
 
-export async function generateTaxReport(taxes: Tax[]): Promise<MessageEmbed> {
+export async function generateTaxReport(taxes: Tax[], octoGain: number): Promise<MessageEmbed> {
     const embed: MessageEmbed = new MessageEmbed()
         .setColor(0xff8400)
         .setTitle("Octo GAMING Tax Report")
         .setDescription("Total amount lost to tax: $" + taxes.reduce((acc, curr) => { return acc + curr.tax; }, 0))
-        .setFooter({text: "Not all taxes are listed here."});
+        .setFooter({text: "Octo gains $" + octoGain + " from today's taxes"});
 
-    const guild = (client.channels.cache.get(allowedChannels[0]) as TextChannel).guild;
+    const guild = (client.channels.cache.get(allowedChannels[0]) as TextChannel)?.guild;
 
     // Need this to know how many spaces to use.
     const longestNameLength: number = Math.max(...await Promise.all(taxes.map<Promise<number>>(async (e: Tax) => {
@@ -124,7 +138,7 @@ export async function taxLoop() {
         while(true) {
             await delay();
             const taxes = await fileTaxes();
-            const embed = await generateTaxReport(taxes);
+            const embed = await generateTaxReport(taxes.taxes, taxes.octoGain);
             (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [embed]});
             (client.channels.cache.get(allowedChannels[0]) as TextChannel)?.send({embeds: [embed]});
         }

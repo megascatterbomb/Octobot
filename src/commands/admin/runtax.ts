@@ -32,7 +32,8 @@ export default class FileTaxCommmand extends ChannelCommand {
         }
         message.reply("Filing taxes...");
         const taxes = await fileTaxes();
-        message.reply({embeds: [await generateTaxReport(taxes)]});
-        (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [await generateTaxReport(taxes)]});
+        const embed = await generateTaxReport(taxes.taxes, taxes.octoGain);
+        message.reply({embeds: [embed]});
+        (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [embed]});
     }
 }
