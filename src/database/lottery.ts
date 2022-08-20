@@ -114,6 +114,7 @@ async function drawLottery() {
         console.log("Lottery Draw: Nobody won the $" + jackpot + " jackpot. Redrawing in 24 hours!");
         (client.channels.cache.get(allowedChannels[0]) as TextChannel).send("Nobody won the " + jackpot + "  Octobucks in today's lottery. Adding 10 Octobucks to the jackpot and redrawing in 24 hours!");
         await lottery.find({}).deleteMany({});
+        await lotteryTicket.findOneAndDelete({user: "redraw"});
         const dbLottery = {
             jackpot: jackpot + 10,
             date: new Date().setUTCHours(24, 0, 0, 0)
