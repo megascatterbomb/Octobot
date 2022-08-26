@@ -123,13 +123,16 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
                         const oldEvent = await getScheduledEvent(drop.user, message.guild, "debt");
                         // Extend debt if user already has debt.
                         if(oldEvent !== null) {
+                            const modifiedEndDate = new Date(oldEvent.triggerTime.getTime() + debt*60000);
                             modifyScheduledEvent(drop.user, drop.msg.guild, "debt", 
                                 {_id: oldEvent._id, user: drop.user.id, guild: message.guild?.id ?? "", eventName: "debt", 
-                                    error: false, triggerTime: new Date(oldEvent.triggerTime.getTime() + debt*60000)});
+                                    error: false, triggerTime: modifiedEndDate});
+                            await message.guild?.members.cache.get(drop.user.id)?.timeout(modifiedEndDate.getUTCMilliseconds() - Date.now(), "This user fell for a trap card and ended up in debt.");
                             targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! They are an additional $" + debt + " in debt, so their mute has " +
                                 "been extended by " + debt + " minutes!");
                         } else {
                             await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
+                            await message.guild?.members.cache.get(drop.user.id)?.timeout(debt * 60000, "This user fell for a trap card and ended up in debt.");
                             targetChannel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
                             debt + " minutes!");
                         }
@@ -174,6 +177,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 15*60000); // 15 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
+            await targetMember.timeout(15 * 60000, "Someone paid $25 to mute this user for 15 minutes.");
             await createScheduledEvent("funnyMute", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for 15 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
@@ -218,6 +222,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 30*60000); // 30 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
+            await targetMember.timeout(30 * 60000, "Someone paid $45 to mute this user for 30 minutes.");
             await createScheduledEvent("funnyMute", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for 30 minutes. Mods reserve the right to remove this mute manually for any reason.");
             return "";
@@ -261,6 +266,7 @@ export const shopItems: Map<string, ShopItem> = new Map<string, ShopItem>([
             }
             const endDate = new Date(Date.now() + 60*60000); // 60 minutes from execution
             await targetMember.roles.add(funnyMuteRole);
+            await targetMember.timeout(60 * 60000, "Someone paid $25 to mute this user for an hour.");
             await createScheduledEvent("funnyMute", targetMember.user.id, targetMember.guild.id, endDate);
             await message.reply("Successfully muted <@" + targetMember.id + "> for an hour. Mods reserve the right to remove this mute manually for any reason.");
             return "";
