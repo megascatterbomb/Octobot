@@ -7,7 +7,7 @@
         "dev": "tsc && ts-node src/index.ts",
         "build": "tsc",
         "start": "ts-node src/index.ts",
-        "prod": "tsc && node build/index.js"
+        "prod": "tsc && ts-node src/index.ts"
     },
     "repository": {
         "type": "git",
