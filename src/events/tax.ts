@@ -137,6 +137,8 @@ export async function taxLoop() {
         // eslint-disable-next-line no-constant-condition
         while(true) {
             await delay();
+            // No taxes in December
+            if(new Date(Date.now()).getUTCMonth() === 11) continue;
             const taxes = await fileTaxes();
             const embed = await generateTaxReport(taxes.taxes, taxes.octoGain);
             (client.channels.cache.get(logChannel) as TextChannel)?.send({embeds: [embed]});
