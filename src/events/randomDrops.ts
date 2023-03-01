@@ -49,9 +49,9 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         
         if(drop.user !== undefined && drop.user !== null) {
             // Anti fraud measures
-            if(message.channel instanceof ThreadChannel) {
+            if(message.channel instanceof ThreadChannel && Math.random() >= 0.5) {
                 await subtractBalance(drop.user, drop.value, true);
-                drop.msg.edit("<@" + drop.user.id + "> has claimed " + drop.value + " Octobucks! Or did they?");
+                drop.msg.edit("<@" + drop.user.id + "> got robbed! They lost " + drop.value + " Octobucks because they carelessly wandered into a thread. Beware drops in threads!");
                 await logRandomDropClaim(drop.user, drop.value, counter - counterStart, true);
             } else {
                 await addBalance(drop.user, drop.value);
