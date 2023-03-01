@@ -3,7 +3,9 @@ import { Channel, Collector, Emoji, Guild, GuildEmoji, Message, MessageAttachmen
 import * as fs from "fs";
 import path from "path";
 import { addJackpot } from "../database/lottery";
-import { addBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
+import { addBalance, getUserBalance, octobuckBalance, subtractBalance } from "../database/octobuckBalance";
+import { createScheduledEvent, getScheduledEvent, modifyScheduledEvent } from "../database/schedule";
+import { debtRole } from "../utilities/config";
 import { logRandomDropClaim } from "../utilities/log";
 
 const counterStart = 1975; // Should be equal or under counterThreshold
@@ -50,8 +52,31 @@ const RandomDropEvent: DiscordEvent<"messageCreate"> = {
         if(drop.user !== undefined && drop.user !== null) {
             // Anti fraud measures
             if(message.channel instanceof ThreadChannel && Math.random() >= 0.5) {
+                const oldBalance = await getUserBalance(drop.user);
                 await subtractBalance(drop.user, drop.value, true);
                 drop.msg.edit("<@" + drop.user.id + "> got robbed! They lost " + drop.value + " Octobucks because they carelessly wandered into a thread. Beware drops in threads!");
+                const newBalance = (oldBalance ?? 0) - drop.value;
+                if(newBalance < 0) {
+                    const debt = -newBalance;
+                    const endDate = new Date(Date.now() + debt*60000); // 1 minute per Octobuck of debt.
+                    await message.guild?.members.cache.get(drop.user.id)?.roles.add(debtRole);
+                    const oldEvent = await getScheduledEvent(drop.user, message.guild, "debt");
+                    // Extend debt if user already has debt.
+                    if(oldEvent !== null) {
+                        const modifiedEndDate = new Date(oldEvent.triggerTime.getTime() + debt*60000);
+                        modifyScheduledEvent(drop.user, drop.msg.guild, "debt", 
+                            {_id: oldEvent._id, user: drop.user.id, guild: message.guild?.id ?? "", eventName: "debt", 
+                                error: false, triggerTime: modifiedEndDate});
+                        await message.guild?.members.cache.get(drop.user.id)?.timeout(modifiedEndDate.getUTCMilliseconds() - Date.now(), "This user fell for a robbery and ended up in debt.");
+                        message.channel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! They are an additional $" + debt + " in debt, so their mute has " +
+                            "been extended by " + debt + " minutes!");
+                    } else {
+                        await createScheduledEvent("debt", drop.user.id, message.guild?.id, endDate);
+                        await message.guild?.members.cache.get(drop.user.id)?.timeout(debt * 60000, "This user fell for a robbery and ended up in debt.");
+                        message.channel.send("Uh oh! Seems like <@" + drop.user + "> can't pay the bills! Since they are $" + debt + " in debt, they have been muted for " +
+                        debt + " minutes!");
+                    }
+                }
                 await logRandomDropClaim(drop.user, drop.value, counter - counterStart, true);
             } else {
                 await addBalance(drop.user, drop.value);
