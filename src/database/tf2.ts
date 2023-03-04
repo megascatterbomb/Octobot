@@ -23,7 +23,8 @@ interface TF2Event {
     attendingUsers: string[],
     maxPlayerCount: number // Max player count seen either through reactions or on the server, used to prevent pinging the same role multiple times for the same event. -1 before event starts.
     playerLimit: number
-    cancelledStatus: string // Prevents users from reacting, provides this as a reason. Empty string means not cancelled
+    eventTitle: string
+    cancelledStatus: string | undefined // Prevents users from reacting, provides this as a reason. undefined means not cancelled
     eventID: string
     messageID: string | undefined
 }
@@ -33,7 +34,8 @@ const tf2EventSchema = new Schema<TF2Event>({
     endTime: {type: Date, required: true},
     attendingUsers: {type: [String], required: true},
     maxPlayerCount: {type: Number, required: true},
-    cancelledStatus: {type: String, required: true},
+    eventTitle: {type: String, required: true},
+    cancelledStatus: {type: String},
     eventID: {type: String, required: true, unique: true},
     messageID: {type: String},
     playerLimit: {type: Number, required: true}
@@ -50,14 +52,17 @@ let currentTf2Events: TF2Event[] = [];
 
 // NEVER call this function outside of /index.ts
 export async function tf2Loop() {
-    if(process.env.ENVIRONMENT !== "PRODUCTION") {
-        return;
-    }
+    await tf2Event.deleteMany();
+    // if(process.env.ENVIRONMENT !== "PRODUCTION") {
+    //     return;
+    // }
     currentTf2Events = await tf2Event.find().exec();
     client.on("messageReactionAdd", async (messageReaction, user) => {
+        if(user.bot) return;
         await interpretReaction(true, user, messageReaction);
     });
     client.on("messageReactionRemove", async (messageReaction, user) => {
+        if(user.bot) return;
         await interpretReaction(false, user, messageReaction);
     });
     // eslint-disable-next-line no-constant-condition
@@ -125,10 +130,14 @@ export async function newSchedule(thisWeekStart: number): Promise<boolean> {
     
     let skip = eventsToSkip;
     const nextWeekStart = thisWeekStart + msInWeek;
-
     const newEvents: TF2Event[] = [];
+
     const channel = client.channels.resolve(scheduleChannel) as TextChannel | undefined;
     if(channel === undefined) throw new Error("Invalid TF2 Schedule channel");
+    try {
+        await channel.bulkDelete(100);
+    // eslint-disable-next-line no-empty
+    } catch {}
 
     for(let i = thisWeekStart; i < nextWeekStart; i += eventDuration) {
         const thisEventStart = i;
@@ -143,6 +152,7 @@ export async function newSchedule(thisWeekStart: number): Promise<boolean> {
             attendingUsers: [],
             maxPlayerCount: -1,
             cancelledStatus: "",
+            eventTitle: "General Gameplay",
             eventID: eventID,
             messageID: undefined,
             playerLimit: 32
@@ -151,13 +161,10 @@ export async function newSchedule(thisWeekStart: number): Promise<boolean> {
         if(skip > 0) {
             skip--;
             event.cancelledStatus = "Too soon to gauge interest";
-            continue;
         }
 
         newEvents.push(event);
     }
-
-    await channel.bulkDelete(100);
 
     currentTf2Events = await constructAndPostMessages(newEvents, thisWeekStart);
     await tf2Event.deleteMany();
@@ -175,37 +182,61 @@ async function constructAndPostMessages(events: TF2Event[], thisWeekStart: numbe
         if(entry === undefined) {
             map.set(eventDay, [event]);
         } else {
-            entry.push();
+            entry.push(event);
         }
     });
     const eventsByDay: TF2Event[][] = Array.from(map.values());
-    const embeds: MessageEmbed[] = [];
+    const embeds: {embed: MessageEmbed, events: TF2Event[]}[] = [];
 
-    for(const day of eventsByDay) {
+    eventsByDay.forEach(day => {
         const dayTimeStamp = day[0].startTime; // We know it's sorted.
         const embed = new MessageEmbed();
 
-        embed.setTitle(`${dayTimeStamp.getUTCDay()} ${dayTimeStamp.getUTCFullYear()} - ${dayTimeStamp.getUTCMonth() + 1} - ${dayTimeStamp.getUTCDate()} (UTC)`);
+        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        embed.setTitle(`${daysOfWeek[dayTimeStamp.getUTCDay()]} ${dayTimeStamp.getUTCFullYear()}/${dayTimeStamp.getUTCMonth() + 1}/${dayTimeStamp.getUTCDate()} (UTC)`);
+        if(Date.now() > dayTimeStamp.valueOf() && Math.abs(dayTimeStamp.valueOf() - Date.now()) < msInDay) {
+            embed.setColor("ORANGE");
+        } else {
+            embed.setColor("DARK_ORANGE");
+        }
 
         const fieldNames = ["A:", "B:", "C:", "D:", "E:", "F:", "G:", "H:", "I:", "J:", "K:", "L:"];
 
-        for(const event of day) {
-            const start = event.startTime.valueOf();
-            const end = event.endTime.valueOf();
-            let value = `<t:${start}:D>\n<t:${start}:t> to <t:${end}:t>\n${event.attendingUsers.length}/${event.playerLimit}`;
+        day.forEach(event => {
+            const start = event.startTime.valueOf() / 1000;
+            const end = event.endTime.valueOf() / 1000;
+            const name = fieldNames[Math.floor((event.startTime.valueOf() % msInDay) / eventDuration)] + " " + event.eventTitle;
+            let value = `<t:${start}:D>\n<t:${start}:t> to <t:${end}:t>`;
 
             if(event.startTime.valueOf() < Date.now() && event.endTime.valueOf() > Date.now()) {
-                value = `Happening now\nEnds <t:${end}:R> (<t:${end}:t>)\n${event.attendingUsers.length}/${event.playerLimit}`;
+                value = `Happening now\nEnds <t:${end}:R> (<t:${end}:t>)`;
             } else if(event.startTime.valueOf() - Date.now() > 0 && event.startTime.valueOf() - Date.now() < 1 * msInHour) {
-                value = `Starts <t:${start}:R> (<t:${start}:t>)\n Ends <t:${end}:t>\n${event.attendingUsers.length}/${event.playerLimit}`;
+                value = `Starts <t:${start}:R> (<t:${start}:t>)\n Ends <t:${end}:t>`;
             }
 
-            embed.addField( fieldNames[Math.floor(event.startTime.valueOf() / msInDay)], value, true);
-        }
-        embeds.push(embed);
+            value += event.cancelledStatus === undefined ? `\n${event.attendingUsers.length}/${event.playerLimit}` : event.cancelledStatus;
+
+            embed.addField(name, value, true);
+        });
+        embeds.push({embed: embed, events: day});
+    });
+
+    const channel = client.channels.resolve(scheduleChannel) as TextChannel | undefined;
+    if(channel === undefined) throw new Error("Invalid TF2 Schedule channel");
+
+    const modifiedEvents: TF2Event[] = [];
+
+    for(const messageData of embeds) {
+        const message = await channel.send({embeds: [messageData.embed]});
+        const modifiedDay = messageData.events.map(e => {
+            e.messageID = message.id;
+            return e;
+        });
+        modifiedEvents.push(...modifiedDay);
     }
 
-    
+    return modifiedEvents;
 }
 
 function delay(date: Date) {

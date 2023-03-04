@@ -28,7 +28,7 @@ export const allowedChannels: string[] = [
 
 export const logChannel = "947220771913228288";
 export const raidNotificationChannel = "790762019287990302";
-export const scheduleChannel = "?";
+export const scheduleChannel = "574157660488859670";
 
 export const octoUserID = process.env.ENVIRONMENT === "PRODUCTION" ? "167925663485919232" : "193950601271443456"; // Octo in production, mega otherwise.
 
