@@ -8,6 +8,7 @@ import { allowedChannels, scheduleChannel} from "../utilities/config";
 import { addBalance } from "./octobuckBalance";
 import { setFlagsFromString } from "v8";
 import { Client } from "@frasermcc/overcord";
+import {Server, RCON, MasterServer} from "@fabricio-191/valve-server-query";
 
 const msInWeek = 604800000;
 const msInDay = 86400000;
@@ -58,11 +59,9 @@ export async function tf2Loop() {
     // }
     currentTf2Events = await tf2Event.find().exec();
     client.on("messageReactionAdd", async (messageReaction, user) => {
-        if(user.bot) return;
         await interpretReaction(true, user, messageReaction);
     });
     client.on("messageReactionRemove", async (messageReaction, user) => {
-        if(user.bot) return;
         await interpretReaction(false, user, messageReaction);
     });
     // eslint-disable-next-line no-constant-condition
@@ -81,7 +80,7 @@ export async function tf2Loop() {
 async function interpretReaction(state: boolean, user: User | PartialUser, reaction: MessageReaction | PartialMessageReaction) {
     const letter = reactionToLetter(reaction);
 
-    if(reaction.message.channelId !== scheduleChannel || letter === null) return;
+    if(user.bot || reaction.message.channelId !== scheduleChannel || letter === null) return;
 
     const messageID = reaction.message.id;
 
@@ -195,11 +194,16 @@ async function constructAndPostMessages(events: TF2Event[], thisWeekStart: numbe
         const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
         embed.setTitle(`${daysOfWeek[dayTimeStamp.getUTCDay()]} ${dayTimeStamp.getUTCFullYear()}/${dayTimeStamp.getUTCMonth() + 1}/${dayTimeStamp.getUTCDate()} (UTC)`);
+        embed.setDescription("Use the reactions below to select when you would like to play Team Fortress 2.\n" + 
+            "Numbers show how many users are available at that time, and how many players can play on the server. For live information scroll to the bottom of this channel.\n" +
+            "Dates and times are in your time-zone unless specified.");
+
         if(Date.now() > dayTimeStamp.valueOf() && Math.abs(dayTimeStamp.valueOf() - Date.now()) < msInDay) {
-            embed.setColor("ORANGE");
+            embed.setColor("YELLOW");
         } else {
             embed.setColor("DARK_ORANGE");
         }
+        embed.setFooter(`Event IDs for this day: ${dayTimeStamp.valueOf()}-#\nSubstitute # for the appropriate letter.`);
 
         const fieldNames = ["A:", "B:", "C:", "D:", "E:", "F:", "G:", "H:", "I:", "J:", "K:", "L:"];
 
@@ -207,15 +211,20 @@ async function constructAndPostMessages(events: TF2Event[], thisWeekStart: numbe
             const start = event.startTime.valueOf() / 1000;
             const end = event.endTime.valueOf() / 1000;
             const name = fieldNames[Math.floor((event.startTime.valueOf() % msInDay) / eventDuration)] + " " + event.eventTitle;
-            let value = `<t:${start}:D>\n<t:${start}:t> to <t:${end}:t>`;
+            const playerCount = `${event.attendingUsers.length}/${event.playerLimit}`;
 
-            if(event.startTime.valueOf() < Date.now() && event.endTime.valueOf() > Date.now()) {
-                value = `Happening now\nEnds <t:${end}:R> (<t:${end}:t>)`;
+            let value = `<t:${start}:D>\n<t:${start}:t> to <t:${end}:t>\n${playerCount}`;
+
+            if(event.cancelledStatus) {
+                value = "Cancelled:\n" + event.cancelledStatus;
+            } else if(event.startTime.valueOf() < Date.now() && event.endTime.valueOf() > Date.now()) {
+                value = `**Happening now\nEnds <t:${end}:R>\n${playerCount}**`;
             } else if(event.startTime.valueOf() - Date.now() > 0 && event.startTime.valueOf() - Date.now() < 1 * msInHour) {
-                value = `Starts <t:${start}:R> (<t:${start}:t>)\n Ends <t:${end}:t>`;
+                value = `Starts <t:${start}:R>\n Ends at <t:${end}:t>\n${playerCount}`;
+            } else if(event.endTime.valueOf() < Date.now()) {
+                event.cancelledStatus = "Event completed";
+                value = `<t:${end}:D>\nFinished at <t:${end}:t>`;
             }
-
-            value += event.cancelledStatus === undefined ? `\n${event.attendingUsers.length}/${event.playerLimit}` : event.cancelledStatus;
 
             embed.addField(name, value, true);
         });
@@ -224,6 +233,27 @@ async function constructAndPostMessages(events: TF2Event[], thisWeekStart: numbe
 
     const channel = client.channels.resolve(scheduleChannel) as TextChannel | undefined;
     if(channel === undefined) throw new Error("Invalid TF2 Schedule channel");
+
+    const infoString = channel.topic;
+    if(infoString !== null) {
+        const server = await Server({
+            ip: "octo-gaming.tf2.host",
+            port: 27015,
+            timeout: 5000
+        });
+        const info = await server.getInfo();
+        const playerCount = info.players.online;
+        const maxPlayers = info.players.max;
+        const infoEmbed = new MessageEmbed();
+        infoEmbed.setTitle("Information:");
+        infoEmbed.setDescription(infoString);
+        infoEmbed.setColor("DARK_GOLD");
+        infoEmbed.addField("TF2 Server Status:", "```" +
+            `Players: ${playerCount}/${maxPlayers}\n` +
+            `Map: ${info.map}` +
+            (info.visibility === "private" ? "\nPASSWORD PROTECTED```" : "```"));
+        embeds.push({embed: infoEmbed, events: []});
+    }
 
     const modifiedEvents: TF2Event[] = [];
 
