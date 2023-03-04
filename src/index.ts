@@ -6,6 +6,7 @@ import { scheduleLoop } from "./database/schedule";
 import { lotteryLoop } from "./database/lottery";
 import { taxLoop } from "./events/tax";
 import { allowedChannels } from "./utilities/config";
+import { tf2Loop } from "./database/tf2";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 
@@ -32,4 +33,5 @@ async function onReady() {
     scheduleLoop();
     lotteryLoop();
     taxLoop();
+    tf2Loop();
 }
